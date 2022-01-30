@@ -15,8 +15,6 @@
 
 #include <arpa/inet.h>
 
-#define PORT "41444" // the port client will be connecting to
-
 #define MAXDATASIZE 512 // max number of bytes we can get at once
 
 // get sockaddr, IPv4 or IPv6:
@@ -41,14 +39,16 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    char *ip = argv[1];
+    char *port = argv[2];
     char *file_name = argv[3];
-    printf("%s\n", file_name);
+    printf("%s %s %s\n", ip, port, file_name);
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(argv[1], PORT, &hints, &servinfo)) != 0){
+    if ((rv = getaddrinfo(argv[1], port, &hints, &servinfo)) != 0){
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -80,14 +80,8 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    if ((numbytes = recv(sockfd, buf, MAXDATASIZE-1, 0)) == -1){
-        perror("recv");
-        exit(1);
-    }
-
-    buf[numbytes] = '\0';
-
-    printf("client: received '%s'\n",buf);
+    if (send(sockfd, file_name, 13, 0) == -1)
+        perror("send");
 
     close(sockfd);
 
