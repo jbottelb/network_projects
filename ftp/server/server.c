@@ -15,6 +15,11 @@
 #include <sys/wait.h>
 #include <signal.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+
+
 #define PORT "41069"  // the port users will be connecting to
 #define MAXDATASIZE 100 // max number of bytes we can get at once
 
@@ -23,6 +28,7 @@
 void sigchld_handler(int s);
 
 char *get_filename_from_client(int sock);
+void send_file_to_socket(int file_fd, int sock_fd);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
@@ -111,11 +117,27 @@ int main(void)
         char* file_name = get_filename_from_client(new_fd);
 
         // SEND file by filename
-
-        close(new_fd);  // parent doesn't need this
+        // get the fd
+        int file_fd = open(file_name, O_CREAT | O_WRONLY, 0600);
+        if (file_fd == -1)
+        {
+          perror("file");
+          close(new_fd);
+          continue;
+        }
+        // send the fd
+        send_file_to_socket(file_fd, new_fd);
+        // close(file_fd);
+        close(new_fd);
     }
 
     return 0;
+}
+
+void send_file_to_socket(int file_fd, int sock_fd)
+{
+    // get size of file
+    
 }
 
 char *get_filename_from_client(int sock)
@@ -138,7 +160,6 @@ void *get_in_addr(struct sockaddr *sa)
     if (sa->sa_family == AF_INET) {
         return &(((struct sockaddr_in*)sa)->sin_addr);
     }
-
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
