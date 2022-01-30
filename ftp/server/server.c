@@ -20,26 +20,12 @@
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
-void sigchld_handler(int s)
-{
-    // waitpid() might overwrite errno, so we save and restore it:
-    int saved_errno = errno;
+void sigchld_handler(int s);
 
-    while(waitpid(-1, NULL, WNOHANG) > 0);
-
-    errno = saved_errno;
-}
-
+char *get_filename_from_client(int sock);
 
 // get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
+void *get_in_addr(struct sockaddr *sa);
 
 int main(void)
 {
@@ -52,7 +38,6 @@ int main(void)
     char s[INET6_ADDRSTRLEN];
     int numbytes;
     int rv;
-    char buf[MAXDATASIZE];
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -123,13 +108,7 @@ int main(void)
         printf("server: got connection from %s\n", s);
 
         // GET file_name
-        if ((numbytes = recv(new_fd, buf, MAXDATASIZE-1, 0)) == -1){
-            perror("recv");
-            exit(1);
-        }
-
-        buf[numbytes] = '\0';
-        printf("server: received file_name '%s'\n",buf);
+        char* file_name = get_filename_from_client(new_fd);
 
         // SEND file by filename
 
@@ -137,4 +116,38 @@ int main(void)
     }
 
     return 0;
+}
+
+char *get_filename_from_client(int sock)
+{
+    int numbytes;
+    char buf[MAXDATASIZE];
+    if ((numbytes = recv(sock, buf, MAXDATASIZE-1, 0)) == -1){
+        perror("recv");
+        exit(1);
+    }
+
+    buf[numbytes] = '\0';
+    printf("server: received file_name '%s'\n",buf);
+    char *buff_pointer = buf;
+    return buff_pointer;
+}
+
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void sigchld_handler(int s)
+{
+    // waitpid() might overwrite errno, so we save and restore it:
+    int saved_errno = errno;
+
+    while(waitpid(-1, NULL, WNOHANG) > 0);
+
+    errno = saved_errno;
 }
