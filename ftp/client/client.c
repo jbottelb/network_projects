@@ -15,7 +15,7 @@
 
 #include <arpa/inet.h>
 
-#define MAXDATASIZE 512 // max number of bytes we can get at once
+#define SIZE 1024 // max number of bytes we can get at once
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -29,7 +29,7 @@ void *get_in_addr(struct sockaddr *sa)
 int main(int argc, char *argv[])
 {
     int sockfd, numbytes;
-    char buf[MAXDATASIZE];
+    char buf[SIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
     char s[INET6_ADDRSTRLEN];
@@ -80,8 +80,16 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    if (send(sockfd, file_name, 13, 0) == -1)
+    if (send(sockfd, file_name, SIZE, 0) == -1)
         perror("send");
+
+    char buffer[SIZE];
+    FILE *fp = fopen(file_name, "w");
+
+    while (recv(sockfd, buffer, SIZE, 0) > 0) {
+        printf("%s", buffer);
+        fwrite(buffer, 1, sizeof(buffer), fp);
+    }
 
     close(sockfd);
 
