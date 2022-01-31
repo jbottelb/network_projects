@@ -126,6 +126,11 @@ int main(void)
           continue;
         }
         // send the fd
+
+
+        // fseek(fp, 0L, SEEK_END);
+        // uint32_t file_length = htonl(ftell(fp));
+
         send_file_to_socket(fp, new_fd);
         close(new_fd);
     }
@@ -139,12 +144,19 @@ void send_file_to_socket(FILE* fp, int sockfd)
     int n;
     char data[SIZE] = {0};
 
-    while(fgets(data, SIZE, fp) != NULL) {
+    // fgets(data, SIZE, fp) != NULL
+
+    while(fread(data, sizeof(char), SIZE, fp) == SIZE) {
         if (send(sockfd, data, sizeof(data), 0) == -1) {
             perror("[-]Error in sending file.");
             exit(1);
         }
         bzero(data, SIZE);
+    }
+
+    if (send(sockfd, data, sizeof(data), 0) == -1) {
+            perror("[-]Error in sending file.");
+            exit(1);
     }
 }
 

@@ -80,15 +80,20 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    if (send(sockfd, file_name, SIZE, 0) == -1)
+    if (send(sockfd, file_name, strlen(file_name), 0) == -1)
         perror("send");
+
+
+    // char sid[SIZE];
+    // uint32_t file_length = ntohl(recv(sockfd, sid, SIZE, 0));
 
     char buffer[SIZE];
     FILE *fp = fopen(file_name, "w");
 
     while (recv(sockfd, buffer, SIZE, 0) > 0) {
-        printf("%s", buffer);
-        fwrite(buffer, 1, sizeof(buffer), fp);
+        //fwrite(buffer, 1, strlen(buffer), fp);
+        fprintf(fp, "%s", buffer);
+        bzero(buffer, SIZE);
     }
 
     close(sockfd);
