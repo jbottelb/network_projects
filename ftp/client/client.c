@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
             continue;
         }
         break;
-    }
+    } 
 
     if (p == NULL){
         fprintf(stderr, "client: failed to connect\n");
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
     if (send(sockfd, file_name, strlen(file_name), 0) == -1)
         perror("send");
-    
+
     if ((len = ntohl(recv(sockfd, buf, sizeof(buf), 0))) == -1) {
         printf("receive");
         exit(1);

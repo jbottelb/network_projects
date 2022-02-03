@@ -144,7 +144,7 @@ int main(void)
 
 void send_file_to_socket(FILE* fp, int sockfd)
 {
-    // get size of file
+    // get size of files
     int n;
     char data[SIZE] = {0};
 
