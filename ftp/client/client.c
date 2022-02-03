@@ -15,7 +15,7 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 
-#define SIZE 1024 // max number of bytes we can get at once
+#define SIZE 1000 // max number of bytes we can get at once
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     char buf[SIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
+    int len, filesize;
     char s[INET6_ADDRSTRLEN];
 
     if (argc != 4){
@@ -82,43 +83,41 @@ int main(int argc, char *argv[])
 
     if (send(sockfd, file_name, strlen(file_name), 0) == -1)
         perror("send");
-
-
-    char size[SIZE];
-    double file_length;
-    int len;
     
-    if ((len = ntohl(recv(sockfd, size, sizeof(size), 0))) == -1) {
-        printf("receive\n");
+    if ((len = ntohl(recv(sockfd, buf, sizeof(buf), 0))) == -1) {
+        printf("receive");
         exit(1);
     }
 
     if (len != 0) {
-        if (atoi(size) < 0) {
+        if (atoi(buf) < 0) {
             printf("File does not exist (client)\n");
             exit(1);
         }
         else {
-            file_length = atoi(size);
+            filesize = atoi(buf);
         }
     }
-    bzero(size, SIZE);
+    bzero(buf, SIZE);
+
+    printf("File size: %d \n",filesize);
 
     char buffer[SIZE];
     FILE *fp = fopen(file_name, "w");
     int bytes_received = 0;
     struct timeval recv_start, recv_end;
 
-    
     gettimeofday(&recv_start, NULL);
 
-    while (bytes_received < file_length) {
+    while (bytes_received < filesize) {
         if ((len = recv(sockfd, buffer, sizeof(buffer), 0)) <= 0) {
             printf("oof moment\n");
             exit(1);
         }
 
         bytes_received += len;
+
+        printf("%s",buffer);
 
         fwrite(buffer, sizeof(char), len, fp);
         bzero(buffer, SIZE);
@@ -130,7 +129,7 @@ int main(int argc, char *argv[])
 
     double total_time = (1000000*recv_end.tv_sec+recv_end.tv_usec) - (1000000*recv_start.tv_sec+recv_start.tv_usec);
 
-    printf("%lf bytes transferred in %lf seconds for a speed of %lf MB/s.\n", file_length, (total_time / 1000000.), (file_length / 1000000.) / (total_time / 1000000.));
+    printf("%d bytes transferred in %lf seconds for a speed of %lf MB/s.\n", filesize, (total_time / 1000000.), (filesize / 1000000.) / (total_time / 1000000.));
 
     return 0;
 }

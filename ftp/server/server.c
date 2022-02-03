@@ -21,7 +21,7 @@
 
 
 #define PORT "41069"  // the port users will be connecting to
-#define SIZE 1024
+#define SIZE 1000
 
 #define BACKLOG 10   // how many pending connections queue will hold
 
@@ -128,6 +128,8 @@ int main(void)
         // send the fd
         fseek(fp, 0L, SEEK_END);
         uint32_t file_length = htonl(ftell(fp));
+        printf("File size: %u \n",file_length);
+
         char sid[SIZE];
         sprintf(sid, "%d", file_length);
 
@@ -147,6 +149,7 @@ void send_file_to_socket(FILE* fp, int sockfd)
     char data[SIZE] = {0};
 
     while(fread(data, sizeof(char), SIZE, fp) == SIZE) {
+        printf("%s", data);
         if (send(sockfd, data, sizeof(data), 0) == -1) {
             perror("[-]Error in sending file.");
             exit(1);
