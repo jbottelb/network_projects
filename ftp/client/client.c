@@ -12,7 +12,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
+#include <sys/time.h>
 #include <arpa/inet.h>
 
 #define SIZE 1024 // max number of bytes we can get at once
@@ -84,19 +84,53 @@ int main(int argc, char *argv[])
         perror("send");
 
 
-    // char sid[SIZE];
-    // uint32_t file_length = ntohl(recv(sockfd, sid, SIZE, 0));
+    char size[SIZE];
+    double file_length;
+    int len;
+    
+    if ((len = ntohl(recv(sockfd, size, sizeof(size), 0))) == -1) {
+        printf("receive\n");
+        exit(1);
+    }
+
+    if (len != 0) {
+        if (atoi(size) < 0) {
+            printf("File does not exist (client)\n");
+            exit(1);
+        }
+        else {
+            file_length = atoi(size);
+        }
+    }
+    bzero(size, SIZE);
 
     char buffer[SIZE];
     FILE *fp = fopen(file_name, "w");
+    int bytes_received = 0;
+    struct timeval recv_start, recv_end;
 
-    while (recv(sockfd, buffer, SIZE, 0) > 0) {
-        //fwrite(buffer, 1, strlen(buffer), fp);
-        fprintf(fp, "%s", buffer);
+    
+    gettimeofday(&recv_start, NULL);
+
+    while (bytes_received < file_length) {
+        if ((len = recv(sockfd, buffer, sizeof(buffer), 0)) <= 0) {
+            printf("oof moment\n");
+            exit(1);
+        }
+
+        bytes_received += len;
+
+        fwrite(buffer, sizeof(char), len, fp);
         bzero(buffer, SIZE);
     }
 
+    gettimeofday(&recv_end, NULL);
     close(sockfd);
+    fclose(fp);
+
+    double total_time = (1000000*recv_end.tv_sec+recv_end.tv_usec) - (1000000*recv_start.tv_sec+recv_start.tv_usec);
+
+    printf("%lf bytes transferred in %lf seconds for a speed of %lf MB/s.\n", file_length, (total_time / 1000000.), (file_length / 1000000.) / (total_time / 1000000.));
 
     return 0;
 }
