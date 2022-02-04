@@ -116,6 +116,8 @@ int main(void)
         // GET file_name
         char* file_name = get_filename_from_client(new_fd);
 
+        return 0;
+
         // SEND file by filename
         // get the fd
         FILE *fp = fopen(file_name, "r");
@@ -148,8 +150,8 @@ void send_file_to_socket(FILE* fp, int sockfd)
     int n;
     char data[SIZE] = {0};
 
+    // add variable to read numbytes
     while(fread(data, sizeof(char), SIZE, fp) == SIZE) {
-        printf("%s", data);
         if (send(sockfd, data, sizeof(data), 0) == -1) {
             perror("[-]Error in sending file.");
             exit(1);
@@ -165,15 +167,25 @@ void send_file_to_socket(FILE* fp, int sockfd)
 
 char *get_filename_from_client(int sock)
 {
+    uint16_t file_size;
     int numbytes;
     char buf[SIZE];
-    if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
-        perror("recv");
+
+    if ((file_size = recv(sock, buf, 2, 0)) == -1) {
+        printf("File name length was not received. \n");
         exit(1);
     }
 
+    if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
+        printf("File name was not received. \n");
+        exit(1);
+    }
+
+    printf("server: received file_name length: %u \n", file_size);
+
     buf[numbytes] = '\0';
-    printf("server: received file_name '%s'\n",buf);
+    printf("server: received file_name '%s'\n", buf);
+
     char *buff_pointer = buf;
     return buff_pointer;
 }

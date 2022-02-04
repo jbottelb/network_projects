@@ -81,8 +81,21 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    if (send(sockfd, file_name, strlen(file_name), 0) == -1)
-        perror("send");
+    uint16_t file_name_length = strlen(file_name);
+    file_name_length = htons(file_name_length);
+
+    if (send(sockfd, (char *) &file_name_length, sizeof(uint16_t), 0) == -1) {
+        printf("File name length failed to send. \n");
+        exit(1);
+    }
+
+    if (send(sockfd, file_name, strlen(file_name), 0) == -1) {
+        printf("File name failed to send. \n");
+        exit(1);
+    }
+
+    return 0;
+
 
     if ((len = ntohl(recv(sockfd, buf, sizeof(buf), 0))) == -1) {
         printf("receive");
@@ -111,13 +124,13 @@ int main(int argc, char *argv[])
 
     while (bytes_received < filesize) {
         if ((len = recv(sockfd, buffer, sizeof(buffer), 0)) <= 0) {
-            printf("oof moment\n");
             exit(1);
         }
 
         bytes_received += len;
 
-        printf("%s",buffer);
+        printf("%d\n",len);
+        printf("%d\n", bytes_received);
 
         fwrite(buffer, sizeof(char), len, fp);
         bzero(buffer, SIZE);
