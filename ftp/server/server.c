@@ -44,6 +44,7 @@ int main(void)
     char s[INET6_ADDRSTRLEN];
     int numbytes;
     int rv;
+    int len;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -113,29 +114,32 @@ int main(void)
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        // GET file_name
+        /////// Start commenting here
+
         char* file_name = get_filename_from_client(new_fd);
 
-        return 0;
-
-        // SEND file by filename
-        // get the fd
         FILE *fp = fopen(file_name, "r");
         if (fp == NULL)
         {
-          perror("file");
+          printf("server: file does not exist. \n");
           close(new_fd);
-          continue;
+          exit(1);
         }
-        // send the fd
-        fseek(fp, 0L, SEEK_END);
-        uint32_t file_length = htonl(ftell(fp));
-        printf("File size: %u \n",file_length);
 
-        char sid[SIZE];
-        sprintf(sid, "%d", file_length);
+        if (fseek(fp, 0L, SEEK_END) != 0) {
+            printf("server: error in reaching EOF. \n");
+            exit(1);
+        }
 
-        send(sockfd, sid, strlen(sid), 0);
+        uint32_t file_size = ftell(fp);
+        file_size = htonl(file_size);
+
+        if (send(new_fd, (char *) &file_size, sizeof(uint32_t), 0) == -1) {
+            printf("server: file size failed to send. \n");
+            exit(1);
+        }
+
+        // Continue Here
 
         send_file_to_socket(fp, new_fd);
         close(new_fd);
@@ -146,42 +150,53 @@ int main(void)
 
 void send_file_to_socket(FILE* fp, int sockfd)
 {
-    // get size of files
-    int n;
-    char data[SIZE] = {0};
+    int numbytes, numread;
+    char data[SIZE];
 
-    // add variable to read numbytes
-    while(fread(data, sizeof(char), SIZE, fp) == SIZE) {
+    while(fgets(data, SIZE, fp) != NULL) {
+        printf("%s", data);
         if (send(sockfd, data, sizeof(data), 0) == -1) {
-            perror("[-]Error in sending file.");
+            printf("server: error sending data packet. \n");
             exit(1);
         }
         bzero(data, SIZE);
     }
+    /*
+    while((numbytes = fread(data, sizeof(char), SIZE, fp)) == SIZE) {
+        printf("Bytes read: %d\n", numbytes);
+        if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
+            printf("server: error sending data packet. \n");
+            exit(1);
+        }
+        printf("Bytes sent: %d\n", numread);
+        bzero(data, SIZE);
+    }
 
-    if (send(sockfd, data, sizeof(data), 0) == -1) {
-            perror("[-]Error in sending file.");
+    if ((numread = send(sockfd, data, numbytes, 0)) == -1) {
+            printf("server: error sending data packet. \n");
             exit(1);
     }
+    printf("Bytes read: %d\n", numbytes);
+    printf("Bytes sent: %d\n", numread);
+    */
 }
 
 char *get_filename_from_client(int sock)
 {
-    uint16_t file_size;
-    int numbytes;
+    int file_size, numbytes;
     char buf[SIZE];
 
     if ((file_size = recv(sock, buf, 2, 0)) == -1) {
-        printf("File name length was not received. \n");
+        printf("server: file name length was not received. \n");
         exit(1);
     }
 
     if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
-        printf("File name was not received. \n");
+        printf("server: file name was not received. \n");
         exit(1);
     }
 
-    printf("server: received file_name length: %u \n", file_size);
+    printf("server: received file_name length: %d \n", file_size);
 
     buf[numbytes] = '\0';
     printf("server: received file_name '%s'\n", buf);

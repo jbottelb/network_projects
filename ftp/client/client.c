@@ -1,6 +1,5 @@
 /*
 ** client.c -- a stream socket client demo
-  we ripped this all from beej but thats what you did too sooo
 */
 
 #include <stdio.h>
@@ -32,7 +31,7 @@ int main(int argc, char *argv[])
     char buf[SIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
-    int len, filesize;
+    int len;
     char s[INET6_ADDRSTRLEN];
 
     if (argc != 4){
@@ -81,58 +80,71 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
+    ////// Start commenting here
+
     uint16_t file_name_length = strlen(file_name);
     file_name_length = htons(file_name_length);
 
-    if (send(sockfd, (char *) &file_name_length, sizeof(uint16_t), 0) == -1) {
-        printf("File name length failed to send. \n");
+    if ((len = send(sockfd, (char *) &file_name_length, sizeof(uint16_t), 0)) == -1) {
+        printf("client: file name length failed to send. \n");
         exit(1);
     }
+
+    printf("client: file name length sent: %d \n", len);
 
     if (send(sockfd, file_name, strlen(file_name), 0) == -1) {
-        printf("File name failed to send. \n");
+        printf("client: file name failed to send. \n");
         exit(1);
     }
 
-    return 0;
+    printf("client: file name sent: %s \n", file_name);
 
+    uint32_t expected_bytes;
 
-    if ((len = ntohl(recv(sockfd, buf, sizeof(buf), 0))) == -1) {
-        printf("receive");
+    if (recv(sockfd, &expected_bytes, 4, 0) == -1) {
+        printf("client: failed to receive file size. \n");
         exit(1);
     }
 
-    if (len != 0) {
-        if (atoi(buf) < 0) {
-            printf("File does not exist (client)\n");
-            exit(1);
-        }
-        else {
-            filesize = atoi(buf);
-        }
-    }
-    bzero(buf, SIZE);
+    expected_bytes = ntohl(expected_bytes);
 
-    printf("File size: %d \n",filesize);
+    printf("client: file size received: %u \n", expected_bytes);
+
+    // Continue Here
 
     char buffer[SIZE];
-    FILE *fp = fopen(file_name, "w");
     int bytes_received = 0;
     struct timeval recv_start, recv_end;
+    
+    FILE *fp = fopen(file_name, "w");
+    if (fp == NULL) {
+          printf("client: bad file opening. \n");
+          close(sockfd);
+          exit(1);
+    }
 
     gettimeofday(&recv_start, NULL);
 
-    while (bytes_received < filesize) {
-        if ((len = recv(sockfd, buffer, sizeof(buffer), 0)) <= 0) {
-            exit(1);
+    while (bytes_received < expected_bytes) {
+        if (expected_bytes - bytes_received < SIZE) {
+            if ((len = recv(sockfd, buffer, expected_bytes - bytes_received, 0)) == -1) {
+                printf("client: error receiving data packet. \n");
+                exit(1);
+            }
+        }
+        else {
+            if ((len = recv(sockfd, buffer, SIZE, 0)) == -1) {
+                printf("client: error receiving data packet. \n");
+                exit(1);
+            }
         }
 
         bytes_received += len;
 
-        printf("%d\n",len);
-        printf("%d\n", bytes_received);
-
-        fwrite(buffer, sizeof(char), len, fp);
+        if (fwrite(buffer, sizeof(char), len, fp) != len) {
+            printf("client: bad write \n");
+            exit(1);
+        }
         bzero(buffer, SIZE);
     }
 
@@ -142,7 +154,7 @@ int main(int argc, char *argv[])
 
     double total_time = (1000000*recv_end.tv_sec+recv_end.tv_usec) - (1000000*recv_start.tv_sec+recv_start.tv_usec);
 
-    printf("%d bytes transferred in %lf seconds for a speed of %lf MB/s.\n", filesize, (total_time / 1000000.), (filesize / 1000000.) / (total_time / 1000000.));
+    printf("%d bytes transferred in %lf seconds for a speed of %lf MB/s.\n", bytes_received, (total_time / 1000000.), (bytes_received / 1000000.) / (total_time / 1000000.));
 
     return 0;
 }
