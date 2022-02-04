@@ -27,7 +27,7 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, numbytes;
+    int sockfd;
     char buf[SIZE];
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -80,18 +80,20 @@ int main(int argc, char *argv[])
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    ////// Start commenting here
-
+    
+    // Get length of file name
     uint16_t file_name_length = strlen(file_name);
+
+    // Convert from host order to network short order
     file_name_length = htons(file_name_length);
 
+    // Send the file name length to server
     if ((len = send(sockfd, (char *) &file_name_length, sizeof(uint16_t), 0)) == -1) {
         printf("client: file name length failed to send. \n");
         exit(1);
     }
 
-    printf("client: file name length sent: %d \n", len);
-
+    // Send the file name itself to the server
     if (send(sockfd, file_name, strlen(file_name), 0) == -1) {
         printf("client: file name failed to send. \n");
         exit(1);
@@ -99,23 +101,22 @@ int main(int argc, char *argv[])
 
     printf("client: file name sent: %s \n", file_name);
 
-    uint32_t expected_bytes;
-
+    // Receive expected file size from server
+    uint32_t expected_bytes;    
     if (recv(sockfd, &expected_bytes, 4, 0) == -1) {
         printf("client: failed to receive file size. \n");
         exit(1);
     }
 
+    // Convert from network order to host long order
     expected_bytes = ntohl(expected_bytes);
 
     printf("client: file size received: %u \n", expected_bytes);
 
-    // Continue Here
-
-    char buffer[SIZE];
     int bytes_received = 0;
     struct timeval recv_start, recv_end;
     
+    // Create file to be written to
     FILE *fp = fopen(file_name, "w");
     if (fp == NULL) {
           printf("client: bad file opening. \n");
@@ -123,17 +124,20 @@ int main(int argc, char *argv[])
           exit(1);
     }
 
+    // Start time of transfer
     gettimeofday(&recv_start, NULL);
 
+    // Loop until all bytes are received
     while (bytes_received < expected_bytes) {
+        // Check for the edge case of packete size being less than the buffer size
         if (expected_bytes - bytes_received < SIZE) {
-            if ((len = recv(sockfd, buffer, expected_bytes - bytes_received, 0)) == -1) {
+            if ((len = recv(sockfd, buf, expected_bytes - bytes_received, 0)) == -1) {
                 printf("client: error receiving data packet. \n");
                 exit(1);
             }
         }
         else {
-            if ((len = recv(sockfd, buffer, SIZE, 0)) == -1) {
+            if ((len = recv(sockfd, buf, SIZE, 0)) == -1) {
                 printf("client: error receiving data packet. \n");
                 exit(1);
             }
@@ -141,20 +145,27 @@ int main(int argc, char *argv[])
 
         bytes_received += len;
 
-        if (fwrite(buffer, sizeof(char), len, fp) != len) {
+        // Write packet that was received
+        if (fwrite(buf, sizeof(char), len, fp) != len) {
             printf("client: bad write \n");
             exit(1);
         }
-        bzero(buffer, SIZE);
+        bzero(buf, SIZE);
     }
 
+    // End time of transfer
     gettimeofday(&recv_end, NULL);
+
+    // Close socket connection
     close(sockfd);
+
+    // Close file pointer
     fclose(fp);
 
+    // Report results of transfer
     double total_time = (1000000*recv_end.tv_sec+recv_end.tv_usec) - (1000000*recv_start.tv_sec+recv_start.tv_usec);
 
-    printf("%d bytes transferred in %lf seconds for a speed of %lf MB/s.\n", bytes_received, (total_time / 1000000.), (bytes_received / 1000000.) / (total_time / 1000000.));
+    printf("%d bytes transferred over %lf seconds for a speed of %lf MB/s.\n", bytes_received, (total_time / 1000000.), (bytes_received / 1000000.) / (total_time / 1000000.));
 
     return 0;
 }
