@@ -14,7 +14,6 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
-
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -26,14 +25,14 @@
 #define BACKLOG 10   // how many pending connections queue will hold
 
 void sigchld_handler(int s);
-
+int is_valid_ip(char *);
 char *get_filename_from_client(int sock);
 void send_file_to_socket(FILE* file_fd, int sock_fd);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
 
-int main(void)
+int main(int argc, char *argv[])
 {
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -43,13 +42,19 @@ int main(void)
     int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
+    char *port;
+
+    if (argc == 2)
+        port = argv[1];
+    else
+        port = PORT;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
@@ -112,6 +117,11 @@ int main(void)
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
+        if (is_valid_ip(s)){
+            close(new_fd);
+            continue;
+        }
+
         // Get file name from client
         char* file_name = get_filename_from_client(new_fd);
 
@@ -162,7 +172,7 @@ void send_file_to_socket(FILE* fp, int sockfd)
 {
     int numbytes, numread;
     char data[SIZE];
-    
+
     // Loop until all data is sen
     while((numbytes = fread(data, sizeof(char), SIZE, fp)) == SIZE) {
         // Sends the packet to the client
@@ -221,4 +231,18 @@ void sigchld_handler(int s)
     while(waitpid(-1, NULL, WNOHANG) > 0);
 
     errno = saved_errno;
+}
+
+int is_valid_ip(char *ip){
+    /*
+    Prepare yourself for this stroke of brilliance, emphasis on stroke.
+    */
+    printf("Checking address: %s\n", ip);
+    char a = ip[0], b = ip[1], c = ip[2], d = ip[4], e = ip[5], f = ip[6];
+    if (a != '1') return -1;
+    if (b == '2' && c == '7') return 0;
+    if (b == '2' && c == '9' && d == '7' && e == '4') return 0;
+    if (b == '9' && c == '2' && d == '1' && e == '6' && f == '8') return 0;
+
+    return -1;
 }
