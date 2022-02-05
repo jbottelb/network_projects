@@ -239,10 +239,11 @@ int is_valid_ip(char *ip){
     */
     printf("Checking address: %s\n", ip);
     char a = ip[0], b = ip[1], c = ip[2], d = ip[4], e = ip[5], f = ip[6];
+    if (ip[3] != '.') return -1;
     if (a != '1') return -1;
     if (b == '2' && c == '7') return 0;
-    if (b == '2' && c == '9' && d == '7' && e == '4') return 0;
-    if (b == '9' && c == '2' && d == '1' && e == '6' && f == '8') return 0;
+    if (b == '2' && c == '9' && d == '7' && e == '4' && ip[6] == '.') return 0;
+    if (b == '9' && c == '2' && d == '1' && e == '6' && f == '8' && ip[7] == '.') return 0;
 
     return -1;
 }
