@@ -1,14 +1,14 @@
 # FTP - Project 1
 
-## Josh Bottelberghe and Joesph Sweilem
+## Josh Bottelberghe and Joseph Sweilem
 
 ### Table 
 ![table](table.png)
 
 ### Discussion
 
-The preformace testing ran as expected, the big file took signifigantly longer, and that makes sense because more packets had to be sent to transfer the data. 
-Testing from seperate machines ran much slower as well as the packets had to transfer accross multiple machines. 
+The performance testing ran as expected, the big file took significantly longer, and that makes sense because more packets had to be sent to transfer the data. 
+Testing from seperate machines ran much slower as well as the packets had to transfer accross multiple machines. Other than this, the programs work as directed due to the passing of the size of the file to be transferred.
 
 ## EC
 - Submitted on OG due date
