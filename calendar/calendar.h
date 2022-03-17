@@ -48,9 +48,7 @@ Calendar *add_event      (Calendar *cal, event *e);
 int remove_event   (Calendar *cal, char *event_id);
 event** get_events_by_date(Calendar *cal, char* date);
 event** get_events_by_range(Calendar *cal, char* start_date, char* end_date);
-event *create_event(char *name, char *date,
-    char *time, char *duration, char *location, char* identifier);
-// used to find dates in a range for range lookup
+event *create_event(char *name, char *date, char *time, char *duration, char *location, char* identifier);
 int in_date_range(char* start, char* end, char *date);
 
 Calendar *load_calendar(char *file_path, char *name)

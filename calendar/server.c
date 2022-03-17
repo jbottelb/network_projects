@@ -33,7 +33,7 @@ int handler()
 
     // take request from client
 
-
+    // REMEMBER: REQUEST MUST BE MALLOCED AND FREED
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
 

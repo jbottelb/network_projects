@@ -183,7 +183,7 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = open(file_path, "r");
+    FILE *fp = open(file_path, "ra");
     if (!fp)
         return NULL;
 
@@ -213,6 +213,7 @@ Calendar *load_calendar(char *file_path, char *name)
 */
 Calendar* process_edit_request(char* request, char *type, Calendar *cal)
 {
+    add_request(request, cal->file);
     // add event
     switch (type):
         case "ADD":
@@ -231,5 +232,7 @@ Calendar* process_edit_request(char* request, char *type, Calendar *cal)
 
 int add_request(char* request, FILE *fp)
 {
-
+    // Adds request string to the file
+    fputs(request, fp);
+    return 0;
 }
