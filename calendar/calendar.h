@@ -34,8 +34,11 @@ typedef struct Calendar Calendar;
 struct Calendar {
     char *name;
     event *head;
+    FILE *file;
     int count;
 };
+
+int free_calendar(Calendar *cal);
 
 char *string_from_Calendar(Calendar *cal);
 char *string_from_event(event *e);
@@ -49,5 +52,9 @@ event *create_event(char *name, char *date,
     char *time, char *duration, char *location, char* identifier);
 // used to find dates in a range for range lookup
 int in_date_range(char* start, char* end, char *date);
+
+Calendar *load_calendar(char *file_path, char *name)
+Calednar *process_edit_request(char* request, char *type, Calendar *cal);
+int add_request(char* request, FILE *fp);
 
 #endif

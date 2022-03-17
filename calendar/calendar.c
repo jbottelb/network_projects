@@ -164,3 +164,72 @@ int in_date_range(char* start, char* end, char *date)
     }
     return 0;
 }
+
+int is_loaded(Calendar *cal){
+    if (cal->file){
+        return 1;
+    }
+    return 0;
+}
+
+/*
+
+The following code is for dealing with the data on disk (in /data)
+
+Each calendar is in its own file, and is loaded into a linked list of events
+called a calendar. It is a linked list because that is the easist DS for me
+to impliment in C. There is no other reason.
+
+*/
+Calendar *load_calendar(char *file_path, char *name)
+{
+    FILE *fp = open(file_path, "r");
+    if (!fp)
+        return NULL;
+
+    Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
+    cal->name = name;
+    cal->file = fp;
+    cal->count = 0;
+    cal->head = NULL;
+
+    char *request = NULL;
+    size_t read;
+    size_t len = 0;
+    while ((read = getline(&request, &len, fp)) != -1)
+    {
+        printf("Adding request from file %s to calendar %s:\n", file_path, name);
+        printf("%s", request);
+        if (process_request(request, cal) != 0)
+            printf("ADD FAILED");
+    }
+
+    return cal;
+}
+
+/*
+    Takes a raw string request and adds it to a calendar
+    (used primarily for load operation)
+*/
+Calendar* process_edit_request(char* request, char *type, Calendar *cal)
+{
+    // add event
+    switch (type):
+        case "ADD":
+            event *e = event_from_string(request);
+            if (add_event(cal, e) != 0)
+                return NULL;
+        case "REMOVE":
+            char *event_id = NULL;
+            remove_event(cal, event_id);
+        case "UPDATE":
+            // update event
+            // remove, then add
+
+    return cal;
+}
+
+int add_request(char* request, FILE *fp)
+{
+
+}

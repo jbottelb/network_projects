@@ -25,6 +25,36 @@
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold
 
+int handler()
+{
+    // handles the requests from the client
+    // (I am outlining to show how to use the calendar class)
+    // (handle the input file like a serialization of requests)
+
+    // take request from client
+
+
+    // load appropriate calendar
+    // Calendar *cal = load_calendar(name + .cal, name)
+
+    // IF IT ISNT THERE, IT WILL HAVE TO BE CREATED.
+
+    /*
+    switch (REQUEST TYPE):
+        case ADD_EVENT or REMOVE or UPDATE:
+            (this handles all disk stuff)
+            cal = process_edit_request(request string, type, cal);
+        case GET:
+            event **events = get_events_by_date(Calendar *cal, char* date);
+            // build return string off of this
+        case GET_RANGE:
+            event **events = get_events_by_range(cal, start, end)
+            // build return string off of this
+
+
+    if we die, free the calendar firsts
+    */
+}
 
 int main(int argc, char *argv[])
 {
