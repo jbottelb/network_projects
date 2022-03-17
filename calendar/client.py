@@ -3,8 +3,9 @@ Client for Calendar
 Python 3, Joe and Josh
 '''
 import socket, sys, time
+import json
 
-ADDR = ("localhost", 9000)
+ADDR = ("localhost", 41069)
 
 def main():
     # TODO: validate length
@@ -13,21 +14,22 @@ def main():
         print("WRONG", len(sys.argv))
         exit(1)
 
-    request_json = handle_args()
-    print(request_json)
+    data = build_data()
+    print(data)
 
-    response = send_request(request_json)
+    response = send_request(data)
 
     print(response)
 
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect(ADDR)
-        sock.sendall(bytes(req))
+        sock.sendall(json.dumps(req).encode())
+        print("Request sent")
         res = sock.recv(1024)
     return res
 
-def handle_args():
+def build_data():
     request = {}
     request["CALENDAR"] = sys.argv[1]
     request["ACTION"]   = sys.argv[2]

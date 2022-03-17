@@ -17,19 +17,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "server.h"
+#include "calendar.h"
 
 
 #define PORT "41069"  // the port users will be connecting to
 #define SIZE 1000
-
 #define BACKLOG 10   // how many pending connections queue will hold
 
-void sigchld_handler(int s);
-char *get_filename_from_client(int sock);
-void send_file_to_socket(FILE* file_fd, int sock_fd);
-
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa);
 
 int main(int argc, char *argv[])
 {
@@ -38,9 +33,15 @@ int main(int argc, char *argv[])
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
     struct sigaction sa;
+    int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
     char *port;
+
+    // calendar project varibles
+    int N = 5;
+    // this is probably wrong, idk we suck at this
+    calendar *CALENDARS = (calendar *) malloc(N * sizeof(calendar));
 
     if (argc == 2)
         port = argv[1];
@@ -65,7 +66,7 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &1,
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
                 sizeof(int)) == -1) {
             perror("setsockopt");
             exit(1);
@@ -160,6 +161,8 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
 
 void send_file_to_socket(FILE* fp, int sockfd)
 {
