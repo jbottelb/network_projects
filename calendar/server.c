@@ -33,7 +33,11 @@ int handler()
 
     // take request from client
 
-    // REMEMBER: REQUEST MUST BE MALLOCED AND FREED
+    // build request with string
+    // REMEMBER: JSON MUST BE MALLOCED AND FREE
+    // request *req = create_request(revieved strin (malloced))
+
+
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
 
@@ -51,9 +55,10 @@ int handler()
             event **events = get_events_by_range(cal, start, end)
             // build return string off of this
 
-
     if we die, free the calendar firsts
+    free request too (close_request)
     */
+    return 0;
 }
 
 int main(int argc, char *argv[])

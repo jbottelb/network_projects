@@ -15,8 +15,14 @@
 #include <errno.h>
 #include "calendar.h"
 
-char *string_from_Calendar(Calendar *cal)
+char *string_from_request(request *e)
 {
+    return NULL;
+}
+
+request *request_from_string(char *s)
+{
+
     return NULL;
 }
 
@@ -32,6 +38,12 @@ event *event_from_string(char *s)
 
 Calendar *add_event(Calendar *cal, event *e)
 {
+    if (!cal->head)
+    {
+        cal->head = e;
+        cal->count++;
+        return cal;
+    }
     event *ptr = cal->head;
     while (ptr->next) {
         if (ptr->name == e->name)
@@ -172,6 +184,26 @@ int is_loaded(Calendar *cal){
     return 0;
 }
 
+int delete_calendar(Calendar *cal)
+{
+    event *ptr = cal->head;
+    while (ptr){
+        event *del = ptr;
+        ptr = ptr->next;
+        free(del->name);
+        free(del->date);
+        free(del->time);
+        free(del->location);
+        free(del->duration);
+        free(del->identifier);
+        free(del);
+    }
+    free(cal->name);
+    fclose(cal->file);
+    free(cal);
+    return 0;
+}
+
 /*
 
 The following code is for dealing with the data on disk (in /data)
@@ -183,7 +215,7 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = open(file_path, "ra");
+    FILE *fp = fopen(file_path, "ra");
     if (!fp)
         return NULL;
 
@@ -193,15 +225,20 @@ Calendar *load_calendar(char *file_path, char *name)
     cal->count = 0;
     cal->head = NULL;
 
-    char *request = NULL;
+    char *string = NULL;
     size_t read;
     size_t len = 0;
-    while ((read = getline(&request, &len, fp)) != -1)
+    while ((read = getline(&string, &len, fp)) != -1)
     {
         printf("Adding request from file %s to calendar %s:\n", file_path, name);
-        printf("%s", request);
-        if (process_request(request, cal) != 0)
+        printf("%s", string);
+
+        request *req = request_from_string(string);
+
+        if (process_edit_request(req, cal) != 0)
             printf("ADD FAILED");
+        free(string);
+        free(req);
     }
 
     return cal;
@@ -211,28 +248,30 @@ Calendar *load_calendar(char *file_path, char *name)
     Takes a raw string request and adds it to a calendar
     (used primarily for load operation)
 */
-Calendar* process_edit_request(char* request, char *type, Calendar *cal)
+Calendar* process_edit_request(request *req, Calendar *cal)
 {
-    add_request(request, cal->file);
+    add_request(req, cal->file);
     // add event
-    switch (type):
-        case "ADD":
-            event *e = event_from_string(request);
-            if (add_event(cal, e) != 0)
-                return NULL;
-        case "REMOVE":
-            char *event_id = NULL;
-            remove_event(cal, event_id);
-        case "UPDATE":
-            // update event
-            // remove, then add
+    switch (req->type){
+        case ADD:
+            break;
+        case REMOVE:
+            break;
+        case UPDATE:
+            break;
+        defualt:
+            break;
+    }
+
 
     return cal;
 }
 
-int add_request(char* request, FILE *fp)
+int add_request(request *req, FILE *fp)
 {
     // Adds request string to the file
-    fputs(request, fp);
+    char *reqString = string_from_event(req->event);
+    fputs(reqString, fp);
+    free (reqString);
     return 0;
 }

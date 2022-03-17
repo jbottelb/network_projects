@@ -13,7 +13,7 @@ EX:
 {
     "CALENDAR": "Joe's Calendar",
     "Action": ADD,
-    "Arguemnts": {
+    "Arguments": {
         date: "Tuesday",
         time: "now",
         duration: "indefinite",
