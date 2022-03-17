@@ -73,11 +73,6 @@ int main(int argc, char *argv[])
     int rv;
     char *port;
 
-    // calendar project varibles
-    int N = 5;
-    // this is probably wrong, idk we suck at this
-    calendar *CALENDARS = (calendar *) malloc(N * sizeof(calendar));
-
     if (argc == 2)
         port = argv[1];
     else
