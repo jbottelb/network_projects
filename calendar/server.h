@@ -14,6 +14,19 @@
 #include <fcntl.h>
 #include <errno.h>
 
+typedef enum {
+    ADD, REMOVE, UPDATE, GET, GETALL, INPUTS
+} RequestType;
+
+typedef struct request request;
+struct request {
+    RequestType type;
+    char *calName;
+    char **keys;
+    char **values;
+    int  numArgs;
+};
+
 
 void sigchld_handler(int s);
 char *get_filename_from_client(int sock);
