@@ -76,6 +76,7 @@ request *request_from_string(char *s)
             it++; jt++;
         }
         req->event = event_from_string(es);
+
     } else if (req->type == REMOVE) {
         printf("Request being built as a REMOVE\n");
 
@@ -362,7 +363,10 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = fopen(file_path, "rwa");
+    FILE *fp = fopen(file_path, "ra");
+    if (!fp){
+        printf("Failed to open file");
+    }
 
 
     Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
@@ -393,12 +397,23 @@ Calendar *load_calendar(char *file_path, char *name)
         request *req = request_from_string(string);
 
         process_edit_request(req, cal);
-
-        free(string);
-        free(req);
     }
+    printf("Done reading from file");
 
     return cal;
+}
+
+void dump_calendar(Calendar *cal){
+    event *curr = cal->head;
+    if (!curr){
+        printf("Empty Calendar\n");
+        return;
+    }
+    while (curr){
+        printf("%s ", curr->name);
+        curr=curr->next;
+    }
+    return;
 }
 
 /*
@@ -411,7 +426,9 @@ Calendar* process_edit_request(request *req, Calendar *cal)
     switch (req->type){
         case ADD:
             add_event(cal, req->event);
+            break;
         case REMOVE:
+            remove_event(cal, req->event->name);
             break;
         case UPDATE:
             break;
@@ -419,8 +436,13 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             break;
     }
 
+    close_request(req);
 
     return cal;
+}
+
+int close_request(request *req){
+    free(req);
 }
 
 int save_request(request *req, FILE *fp)
