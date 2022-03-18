@@ -52,10 +52,8 @@ struct Calendar {
 };
 
 int free_calendar(Calendar *cal);
-
-char    *string_from_request (request *e);
+int free_event(event *e);
 request *request_from_string (char  *s  );
-char    *string_from_event   (event *e  );
 event   *event_from_string   (char  *s  );
 
 Calendar *add_event      (Calendar *cal, event *e);
@@ -68,7 +66,7 @@ int       in_date_range(char* start, char* end, char *date);
 
 Calendar *load_calendar(char *file_path, char *name);
 Calendar *process_edit_request(request *req, Calendar *cal);
-int       add_request(request *req, FILE *fp);
+int       save_request(request *req, FILE *fp);
 
 request *create_request(char *json_string);
 int      close_request(request *req);

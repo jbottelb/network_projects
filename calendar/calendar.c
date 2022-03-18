@@ -15,11 +15,6 @@
 #include <errno.h>
 #include "calendar.h"
 
-char *string_from_request(request *e)
-{
-    return NULL;
-}
-
 request *request_from_string(char *s)
 {
     request *req = (request*) malloc(sizeof(request));
@@ -43,8 +38,6 @@ request *request_from_string(char *s)
         }
         i++;
     }
-    printf("\n%s\n\n", buf);
-
     // get calendar name
     char *calName = malloc(BUFSIZ * sizeof(char));
     int it = 0, jt = 0;
@@ -65,7 +58,6 @@ request *request_from_string(char *s)
         reqType[jt] = buf[it];
         jt++; it++;
     }
-    printf("%s\n", reqType);
     req->type = get_request_type(reqType);
 
     if (req->type == -1){
@@ -127,7 +119,6 @@ RequestType get_request_type(char* reqType){
 
 event *event_from_string(char *s)
 {
-    printf("%s\n", s);
     event *e = (event *) malloc (sizeof(event));
 
     char *date = malloc(BUFSIZ * sizeof(char));
@@ -233,7 +224,7 @@ int remove_event(Calendar *cal, char *event_name)
     ptr->prev->next = ptr->next;
     if (ptr->next)
         ptr->next->prev = ptr->prev;
-    free(ptr);
+    free_event(ptr);
     cal->count--;
     return 0;
 }
@@ -336,19 +327,23 @@ int is_loaded(Calendar *cal){
     return 0;
 }
 
+int free_event(event *e){
+    free(e->name);
+    free(e->date);
+    free(e->time);
+    free(e->location);
+    free(e->duration);
+    free(e->identifier);
+    free(e);
+}
+
 int delete_calendar(Calendar *cal)
 {
     event *ptr = cal->head;
     while (ptr){
         event *del = ptr;
+        free_event(del);
         ptr = ptr->next;
-        free(del->name);
-        free(del->date);
-        free(del->time);
-        free(del->location);
-        free(del->duration);
-        free(del->identifier);
-        free(del);
     }
     free(cal->name);
     fclose(cal->file);
@@ -368,14 +363,24 @@ to impliment in C. There is no other reason.
 Calendar *load_calendar(char *file_path, char *name)
 {
     FILE *fp = fopen(file_path, "ra");
-    if (!fp)
-        return NULL;
+
 
     Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
     cal->name = name;
     cal->file = fp;
     cal->count = 0;
     cal->head = NULL;
+
+    if (!fp) {
+        printf("Creating file for calendar\n");
+        fp = fopen(file_path, "wa");
+        if (!fp) {
+            printf("Failed to create file\n");
+            return NULL;
+        }
+        cal->file = fp;
+        return cal;
+    } cal->file = fp;
 
     char *string = NULL;
     size_t read;
@@ -387,8 +392,8 @@ Calendar *load_calendar(char *file_path, char *name)
 
         request *req = request_from_string(string);
 
-        if (process_edit_request(req, cal) != 0)
-            printf("ADD FAILED");
+        process_edit_request(req, cal);
+
         free(string);
         free(req);
     }
@@ -402,11 +407,10 @@ Calendar *load_calendar(char *file_path, char *name)
 */
 Calendar* process_edit_request(request *req, Calendar *cal)
 {
-    add_request(req, cal->file);
     // add event
     switch (req->type){
         case ADD:
-            break;
+            add_event(cal, req->event);
         case REMOVE:
             break;
         case UPDATE:
@@ -419,10 +423,11 @@ Calendar* process_edit_request(request *req, Calendar *cal)
     return cal;
 }
 
-int add_request(request *req, FILE *fp)
+int save_request(request *req, FILE *fp)
 {
     // Adds request string to the file
     fputs(req->OG, fp);
-    free (req->OG);
+    fflush(fp);
+    // free(req->OG);
     return 0;
 }

@@ -19,9 +19,11 @@
 int main(){
     printf("\nComence Testing\n\n");
 
+    // Calendar *c = (Calendar *)malloc(sizeof(Calendar));
+    Calendar *cal = load_calendar("data/JoeC", "JoeC");
     char s[BUFSIZ] = " \
     { \
-        \"CALENDAR\": \"Joe's Calendar\", \
+        \"CALENDAR\": \"JoeC\", \
         \"Action\": \"ADD\", \
         \"Arguments\": { \
             \"date\": 012222, \
@@ -33,8 +35,16 @@ int main(){
         }\
     } \
     ";
+    printf("Cal init size: %d\n", cal->count);
 
     request * req = request_from_string(s);
+
+    printf("%s, %s, %s, %s, %s", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
+    printf("\n%d\n", req->type);
+    printf("\n%s\n", req->OG);
+
+    cal = process_edit_request(req, cal);
+    save_request(req, cal->file);
 
     return 0;
 }
