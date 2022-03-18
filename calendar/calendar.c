@@ -362,7 +362,7 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = fopen(file_path, "ra");
+    FILE *fp = fopen(file_path, "rwa");
 
 
     Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
@@ -427,6 +427,7 @@ int save_request(request *req, FILE *fp)
 {
     // Adds request string to the file
     fputs(req->OG, fp);
+    fputs("\n", fp);
     fflush(fp);
     // free(req->OG);
     return 0;

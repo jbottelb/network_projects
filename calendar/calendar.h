@@ -47,7 +47,7 @@ typedef struct Calendar Calendar;
 struct Calendar {
     char *name;
     event *head;
-    FILE *file;
+    FILE *file; 
     int count;
 };
 

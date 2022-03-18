@@ -46,5 +46,23 @@ int main(){
     cal = process_edit_request(req, cal);
     save_request(req, cal->file);
 
+    char t[BUFSIZ] = " \
+    { \
+        \"CALENDAR\": \"JoeC\", \
+        \"Action\": \"ADD\", \
+        \"Arguments\": { \
+            \"date\": 1203982, \
+            \"time\": 1233, \
+            \"duration\": \"indefinite\", \
+            \"name\": \"Joe\", \
+            \"description\": \"being mean\", \
+            location: \"everywhere\" \
+        }\
+    } \
+    ";
+    request* req3 = request_from_string(t);
+    cal = process_edit_request(req3, cal);
+    save_request(req3, cal->file);
+
     return 0;
 }
