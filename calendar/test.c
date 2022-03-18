@@ -17,6 +17,24 @@
 #include "calendar.h"
 
 int main(){
-    printf("Comence Testing");
+    printf("\nComence Testing\n\n");
+
+    char s[BUFSIZ] = " \
+    { \
+        \"CALENDAR\": \"Joe's Calendar\", \
+        \"Action\": \"ADD\", \
+        \"Arguments\": { \
+            \"date\": 012222, \
+            \"time\": 1233, \
+            \"duration\": \"indefinite\", \
+            \"name\": \"Joe\", \
+            \"description\": \"being mean\", \
+            location: \"everywhere\" \
+        }\
+    } \
+    ";
+
+    request * req = request_from_string(s);
+
     return 0;
 }

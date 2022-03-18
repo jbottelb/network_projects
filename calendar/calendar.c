@@ -22,18 +22,170 @@ char *string_from_request(request *e)
 
 request *request_from_string(char *s)
 {
+    request *req = (request*) malloc(sizeof(request));
+    req->OG = s;
 
-    return NULL;
+    int l = strlen(s);
+    char buf[BUFSIZ];
+    int i = 0, j=0;
+    int inString = 0;
+
+    // reduce to simplier format (no brackets or spacing)
+    while (s[i] != '\0'){
+        if (s[i] == '"'){
+            inString = (inString == 1) ? 0 : 1;
+            i++;
+            continue;
+        }
+        if ((s[i] != ' ' && s[i] != '{' && s[i] != '}') || inString == 1){
+            buf[j] = s[i];
+            j++;
+        }
+        i++;
+    }
+    printf("\n%s\n\n", buf);
+
+    // get calendar name
+    char *calName = malloc(BUFSIZ * sizeof(char));
+    int it = 0, jt = 0;
+    while (buf[it] != ':') {it++;}
+    it++;
+    while (buf[it] != ','){
+        calName[jt] = buf[it];
+        jt++; it++;
+    }
+    req->calName = calName;
+
+    // get request type
+    char *reqType = malloc(BUFSIZ * sizeof(char));
+    while (buf[it] != ':') {it++;}
+    it++;
+    jt = 0;
+    while (buf[it] != ','){
+        reqType[jt] = buf[it];
+        jt++; it++;
+    }
+    printf("%s\n", reqType);
+    req->type = get_request_type(reqType);
+
+    if (req->type == -1){
+        printf("\nFailed to identify request type\n");
+    }
+
+    if (req->type == ADD){
+        printf("Request being built as an ADD\n");
+        while (buf[it] != ':') {it++;}
+        it++;
+        jt = 0;
+        char *es = malloc(sizeof(char) * BUFSIZ);
+        while (buf[it] != '\0')
+        {
+            es[jt] = buf[it];
+            it++; jt++;
+        }
+        req->event = event_from_string(es);
+    } else if (req->type == REMOVE) {
+        printf("Request being built as a REMOVE\n");
+
+    } else if (req->type == UPDATE) {
+        printf("Request being built as an UPDATE\n");
+
+    } else if (req->type == GET)    {
+        printf("Request being built as a GET\n");
+
+    } else if (req->type == GETALL) {
+        printf("Request being built as an GETALL\n");
+
+    } else if (req->type == INPUTS) {
+        printf("Request being built as a INPUTS\n");
+
+    }
+
+    return req;
 }
 
-char *string_from_event(event *e)
-{
-    return NULL;
+RequestType get_request_type(char* reqType){
+    RequestType tr;
+    if      (strcmp(reqType, "ADD")    == 0) {
+        tr = ADD;
+    } else if (strcmp(reqType, "REMOVE") == 0) {
+        tr = REMOVE;
+    } else if (strcmp(reqType, "UPDATE") == 0) {
+        tr = UPDATE;
+    } else if (strcmp(reqType, "GET"   ) == 0) {
+        tr = GET;
+    } else if (strcmp(reqType, "GETALL") == 0) {
+        tr = GETALL;
+    } else if (strcmp(reqType, "INPUTS") == 0) {
+        tr = INPUTS;
+    } else {
+        tr = -1;
+    }
+    free(reqType);
+    return tr;
 }
 
 event *event_from_string(char *s)
 {
-    return NULL;
+    printf("%s\n", s);
+    event *e = (event *) malloc (sizeof(event));
+
+    char *date = malloc(BUFSIZ * sizeof(char));
+    int it = 0, jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != ','){
+        date[jt] = s[it];
+        jt++; it++;
+    }
+    e->date = date;
+    char *time = malloc(BUFSIZ * sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != ','){
+        time[jt] = s[it];
+        jt++; it++;
+    }
+    e->time = time;
+    char *duration = malloc(BUFSIZ * sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != ','){
+        duration[jt] = s[it];
+        jt++; it++;
+    }
+    e->duration = duration;
+    char *name = malloc(BUFSIZ * sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != ','){
+        name[jt] = s[it];
+        jt++; it++;
+    }
+    e->name = name;
+    char *description = malloc(BUFSIZ * sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != ','){
+        description[jt] = s[it];
+        jt++; it++;
+    }
+    e->description = description;
+    char *location = malloc(BUFSIZ * sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != '\0'){
+        location[jt] = s[it];
+        jt++; it++;
+    }
+    e->location = location;
+
+    return e;
 }
 
 Calendar *add_event(Calendar *cal, event *e)
@@ -270,8 +422,7 @@ Calendar* process_edit_request(request *req, Calendar *cal)
 int add_request(request *req, FILE *fp)
 {
     // Adds request string to the file
-    char *reqString = string_from_event(req->event);
-    fputs(reqString, fp);
-    free (reqString);
+    fputs(req->OG, fp);
+    free (req->OG);
     return 0;
 }
