@@ -47,7 +47,7 @@ typedef struct Calendar Calendar;
 struct Calendar {
     char *name;
     event *head;
-    FILE *file; 
+    char *file_path;
     int count;
 };
 
@@ -56,6 +56,8 @@ int free_event(event *e);
 request *request_from_string (char  *s  );
 event   *event_from_string   (char  *s  );
 
+
+void dump_calendar(Calendar *cal);
 Calendar *add_event      (Calendar *cal, event *e);
 int       delete_calendar(Calendar *cal);
 int       remove_event   (Calendar *cal, char *event_id);
@@ -66,7 +68,7 @@ int       in_date_range(char* start, char* end, char *date);
 
 Calendar *load_calendar(char *file_path, char *name);
 Calendar *process_edit_request(request *req, Calendar *cal);
-int       save_request(request *req, FILE *fp);
+int       save_request(request *req, Calendar *fp);
 
 request *create_request(char *json_string);
 int      close_request(request *req);

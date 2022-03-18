@@ -321,13 +321,6 @@ int in_date_range(char* start, char* end, char *date)
     return 0;
 }
 
-int is_loaded(Calendar *cal){
-    if (cal->file){
-        return 1;
-    }
-    return 0;
-}
-
 int free_event(event *e){
     free(e->name);
     free(e->date);
@@ -347,7 +340,6 @@ int delete_calendar(Calendar *cal)
         ptr = ptr->next;
     }
     free(cal->name);
-    fclose(cal->file);
     free(cal);
     return 0;
 }
@@ -363,28 +355,27 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
+    printf("%s\n", file_path);
     FILE *fp = fopen(file_path, "ra");
     if (!fp){
-        printf("Failed to open file");
+        printf("Failed to open file\n");
     }
 
-
     Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
+    cal->file_path = file_path;
     cal->name = name;
-    cal->file = fp;
     cal->count = 0;
     cal->head = NULL;
 
     if (!fp) {
         printf("Creating file for calendar\n");
-        fp = fopen(file_path, "wa");
+        fp = fopen(file_path, "a");
         if (!fp) {
             printf("Failed to create file\n");
             return NULL;
         }
-        cal->file = fp;
         return cal;
-    } cal->file = fp;
+    }
 
     char *string = NULL;
     size_t read;
@@ -392,7 +383,6 @@ Calendar *load_calendar(char *file_path, char *name)
     while ((read = getline(&string, &len, fp)) != -1)
     {
         printf("Adding request from file %s to calendar %s:\n", file_path, name);
-        printf("%s", string);
 
         request *req = request_from_string(string);
 
@@ -436,8 +426,6 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             break;
     }
 
-    close_request(req);
-
     return cal;
 }
 
@@ -445,12 +433,12 @@ int close_request(request *req){
     free(req);
 }
 
-int save_request(request *req, FILE *fp)
+int save_request(request *req, Calendar *cal)
 {
     // Adds request string to the file
+    FILE* fp = fopen("data/JoeC", "a");
     fputs(req->OG, fp);
-    fputs("\n", fp);
     fflush(fp);
-    // free(req->OG);
+    close_request(req);
     return 0;
 }

@@ -20,8 +20,10 @@ int main(){
     printf("\nComence Testing\n\n");
 
     // Calendar *c = (Calendar *)malloc(sizeof(Calendar));
-    Calendar *cal = load_calendar("data/JoeC", "JoeC");
-    printf("Cal init size: %d\n", cal->count);
+    char *path = (char *)malloc(BUFSIZ * sizeof(char));
+    path = "data/JoeC";
+    Calendar *cal = load_calendar(path, "JoeC");
+    printf("\nCal init size: %d\n", cal->count);
     char s[BUFSIZ] = " \
     { \
         \"CALENDAR\": \"JoeC\", \
@@ -40,13 +42,11 @@ int main(){
 
     request * req = request_from_string(s);
 
-    printf("%s, %s, %s, %s, %s", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
-    printf("\n%d\n", req->type);
-    printf("\n%s\n", req->OG);
+    printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
 
     cal = process_edit_request(req, cal);
-    save_request(req, cal->file);
-/*
+    save_request(req, cal);
+
     char t[BUFSIZ] = " \
     { \
         \"CALENDAR\": \"JoeC\", \
@@ -63,9 +63,9 @@ int main(){
     ";
     request* req3 = request_from_string(t);
     cal = process_edit_request(req3, cal);
-    save_request(req3, cal->file);
-*/
-    // dump_calendar(cal);
+    save_request(req3, cal);
+
+    dump_calendar(cal);
 
     return 0;
 }
