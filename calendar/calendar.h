@@ -48,6 +48,7 @@ struct Calendar {
     char *name;
     event *head;
     char *file_path;
+    FILE *fp;
     int count;
 };
 

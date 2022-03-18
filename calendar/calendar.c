@@ -355,7 +355,6 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    printf("%s\n", file_path);
     FILE *fp = fopen(file_path, "ra");
     if (!fp){
         printf("Failed to open file\n");
@@ -435,10 +434,20 @@ int close_request(request *req){
 
 int save_request(request *req, Calendar *cal)
 {
+    // NOTE! OPENING ON EACH OP AFFECTS PREFORMACE
+    // If we are too slow, we need to fix this
     // Adds request string to the file
-    FILE* fp = fopen("data/JoeC", "a");
+    FILE *fp;
+    if (cal->fp){
+        fp = cal->fp;
+    } else {
+        printf("Reopening file, something went wrong\n");
+        fp = fopen("data/JoeC", "a");
+    }
     fputs(req->OG, fp);
+    fputs("\n", fp);
     fflush(fp);
     close_request(req);
+    cal->fp = fp;
     return 0;
 }
