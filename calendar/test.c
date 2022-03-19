@@ -64,6 +64,9 @@ int main(){
         }\
     } \
     ";
+
+    // dump_calendar(cal);
+
     request* req3 = request_from_string(t);
     cal = process_edit_request(req3, cal);
     save_request(req3, cal);
@@ -77,12 +80,12 @@ int main(){
         }\
     } \
     ";
-    printf("SENDINNG: %s\n", v);
     request* req4 = request_from_string(v);
+    printf("IDENTIFIER TO REMOVE: %s\n", req4->param);
     cal = process_edit_request(req4, cal);
     save_request(req4, cal);
 
-    dump_calendar(cal);
+    // dump_calendar(cal);
 
     return 0;
 }

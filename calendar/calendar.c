@@ -20,9 +20,10 @@ request *request_from_string(char *s)
     request *req = (request*) malloc(sizeof(request));
     req->OG = s;
 
+    // printf("%s\n", s);
+
     int l = strlen(s);
     char buf[BUFSIZ] = {0}; // you would not believe how important the {0} is
-    printf("\n\n%s\n\n", buf);
     int i = 0, j=0;
     int inString = 0;
 
@@ -52,6 +53,7 @@ request *request_from_string(char *s)
 
     // get request type
     char *reqType = malloc(BUFSIZ * sizeof(char));
+
     while (buf[it] != ':') {it++;}
     it++;
     jt = 0;
@@ -74,14 +76,13 @@ request *request_from_string(char *s)
         arg_string[jt] = buf[it];
         it++; jt++;
     }
-    printf("Requst string stripped: %s\n", arg_string);
 
     if (req->type == ADD){
         printf("Request being built as an ADD\n");
         req->event = event_from_string(arg_string);
     } else if (req->type == REMOVE) {
         printf("Request being built as a REMOVE\n");
-        // in this case, the request param will be set to event name
+        // in this case, the request param will be set to event ident
         req->param = get_single_arg(arg_string);
     } else if (req->type == UPDATE) {
         printf("Request being built as an UPDATE\n");
@@ -105,10 +106,15 @@ request *request_from_string(char *s)
 
 char *get_single_arg(char *str){
     // if there is only one arg for the request, we can use this
-    printf("Remove string: %s\n1234\n", str);
-
-
-    return NULL;
+    char *param = malloc(BUFSIZ * sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it] != ':') {it++;}
+    it++;
+    while (str[it] != '\0'){
+        param[jt] = str[it];
+        jt++; it++;
+    }
+    return param;
 }
 
 RequestType get_request_type(char* reqType){
@@ -126,8 +132,10 @@ RequestType get_request_type(char* reqType){
     } else if (strcmp(reqType, "INPUTS") == 0) {
         tr = INPUTS;
     } else {
+        printf("Invalid type, got: %s\n", reqType);
         tr = -1;
     }
+    free(reqType);
     return tr;
 }
 
@@ -196,6 +204,7 @@ event *event_from_string(char *s)
 Calendar *add_event(Calendar *cal, event *e)
 {
     e->identifier = cal->identifier_counter++;
+    printf("Assigning identifier to event: %d\n", e->identifier);
     if (!cal->head)
     {
         cal->head = e;
@@ -229,20 +238,42 @@ event *create_event(char *name, char *date, char *time,
     return new_event;
 }
 
-int remove_event(Calendar *cal, int identifier)
+int remove_event(Calendar *cal, char *i_string)
 {
+    int identifier = atoi(i_string);
+    free(i_string);
+    printf("Remove int: %d\n", identifier);
     event *ptr = cal->head;
-    while (ptr->identifier!=identifier){
-        ptr = ptr->next;
-        if (!ptr)
-            return 1;
+    if (ptr->prev){
+        printf("Head note has a prev. That is bad\n");
     }
-    event *temp = ptr->next;
-    ptr->prev->next = ptr->next;
-    if (ptr->next)
-        ptr->next->prev = ptr->prev;
+
+    while (ptr->identifier!=identifier){
+        if (!ptr->next)
+        {
+            printf("No node by identifer %d\n", identifier);
+            return 1;
+        }
+        ptr = ptr->next;
+    }
+    printf("%s\n", ptr->name);
+
+    if (ptr == cal->head){
+        cal->head = ptr->next;
+        if (ptr->next)
+            ptr->next->prev = NULL;
+    }
+    else {
+        if (!ptr->next){
+            ptr->prev->next = NULL;
+        } else {
+            ptr->next->prev = ptr->prev;
+            ptr->prev->next = ptr->next;
+        }
+    }
     free_event(ptr);
     cal->count--;
+    printf("Removed event successfully. Calendar size: %d\n", cal->count);
     return 0;
 }
 
@@ -400,8 +431,8 @@ Calendar *load_calendar(char *file_path, char *name)
         printf("Adding request from file %s to calendar %s:\n", file_path, name);
 
         request *req = request_from_string(string);
-
         process_edit_request(req, cal);
+        close_request(req);
     }
     printf("Done reading from file");
 
@@ -410,6 +441,7 @@ Calendar *load_calendar(char *file_path, char *name)
 
 void dump_calendar(Calendar *cal){
     event *curr = cal->head;
+    printf("Calendar Contents: \n");
     if (!curr){
         printf("Empty Calendar\n");
         return;
@@ -433,7 +465,7 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             add_event(cal, req->event);
             break;
         case REMOVE:
-            remove_event(cal, req->event->identifier);
+            remove_event(cal, req->param);
             break;
         case UPDATE:
             update_event(cal, req->param);

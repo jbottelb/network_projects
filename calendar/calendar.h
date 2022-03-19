@@ -66,7 +66,7 @@ char *get_getall_dates(char *str);
 void dump_calendar(Calendar *cal);
 Calendar *add_event      (Calendar *cal, event *e);
 int       delete_calendar(Calendar *cal);
-int       remove_event   (Calendar *cal, int identifier);
+int       remove_event   (Calendar *cal, char *i_string);
 event  ** get_events_by_date(Calendar *cal, char* date);
 event  ** get_events_by_range(Calendar *cal, char* start_date, char* end_date);
 event    *create_event(char *name, char *date, char *time, char *duration, char *location, int identifier);
