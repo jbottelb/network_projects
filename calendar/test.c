@@ -45,6 +45,9 @@ int main(){
     printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
 
     cal = process_edit_request(req, cal);
+    // use req->event to get data to send to client.
+    // Must be done AFTER processing,
+    // otherwise it won't have an identifier.
     save_request(req, cal);
 
     char t[BUFSIZ] = " \
@@ -64,6 +67,20 @@ int main(){
     request* req3 = request_from_string(t);
     cal = process_edit_request(req3, cal);
     save_request(req3, cal);
+
+    char v[BUFSIZ] = " \
+    { \
+        \"CALENDAR\": \"JoeC\", \
+        \"Action\": \"REMOVE\", \
+        \"Arguments\": { \
+            \"identifier\": 0 \
+        }\
+    } \
+    ";
+    printf("SENDINNG: %s\n", v);
+    request* req4 = request_from_string(v);
+    cal = process_edit_request(req4, cal);
+    save_request(req4, cal);
 
     dump_calendar(cal);
 

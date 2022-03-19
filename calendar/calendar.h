@@ -29,7 +29,7 @@ struct event {
     char *duration;
     char *location;
     char *description;
-    char *identifier;
+    int identifier;
     event *next;
     event *prev;
 };
@@ -39,7 +39,7 @@ struct request {
     RequestType type;
     char *OG;           // origonal string for storage
     char *calName;
-    char **params;      // not used in ADD
+    char *param;         // not used in ADD, for range, start_date:end_date
     event *event;       // only used in ADD
 };
 
@@ -48,6 +48,7 @@ struct Calendar {
     char *name;
     event *head;
     char *file_path;
+    int identifier_counter;
     FILE *fp;
     int count;
 };
@@ -56,16 +57,22 @@ int free_calendar(Calendar *cal);
 int free_event(event *e);
 request *request_from_string (char  *s  );
 event   *event_from_string   (char  *s  );
+char *string_from_event(event *e);
 
+char *get_single_arg(char *str);
+char *get_update_params(char *str);
+char *get_getall_dates(char *str);
 
 void dump_calendar(Calendar *cal);
 Calendar *add_event      (Calendar *cal, event *e);
 int       delete_calendar(Calendar *cal);
-int       remove_event   (Calendar *cal, char *event_id);
+int       remove_event   (Calendar *cal, int identifier);
 event  ** get_events_by_date(Calendar *cal, char* date);
 event  ** get_events_by_range(Calendar *cal, char* start_date, char* end_date);
-event    *create_event(char *name, char *date, char *time, char *duration, char *location, char* identifier);
+event    *create_event(char *name, char *date, char *time, char *duration, char *location, int identifier);
 int       in_date_range(char* start, char* end, char *date);
+void update_event(Calendar *cal, char *params);
+
 
 Calendar *load_calendar(char *file_path, char *name);
 Calendar *process_edit_request(request *req, Calendar *cal);

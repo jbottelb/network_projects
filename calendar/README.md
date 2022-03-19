@@ -26,3 +26,11 @@ EX:
         "location": "everywhere"
     }
 }
+
+{
+    "CALENDAR": "Joe's Calendar",
+    "Action": REMOVE,
+    "Arguments": {
+        "identifier": 0
+    }
+}

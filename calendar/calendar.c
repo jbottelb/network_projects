@@ -21,7 +21,8 @@ request *request_from_string(char *s)
     req->OG = s;
 
     int l = strlen(s);
-    char buf[BUFSIZ];
+    char buf[BUFSIZ] = {0}; // you would not believe how important the {0} is
+    printf("\n\n%s\n\n", buf);
     int i = 0, j=0;
     int inString = 0;
 
@@ -63,38 +64,51 @@ request *request_from_string(char *s)
     if (req->type == -1){
         printf("\nFailed to identify request type\n");
     }
+    // remaining string is passed to corresponding function for rest of params
+    while (buf[it] != ':') {it++;}
+    it++;
+    jt = 0;
+    char *arg_string = malloc(sizeof(char) * BUFSIZ);
+    while (buf[it] != '\0')
+    {
+        arg_string[jt] = buf[it];
+        it++; jt++;
+    }
+    printf("Requst string stripped: %s\n", arg_string);
 
     if (req->type == ADD){
         printf("Request being built as an ADD\n");
-        while (buf[it] != ':') {it++;}
-        it++;
-        jt = 0;
-        char *es = malloc(sizeof(char) * BUFSIZ);
-        while (buf[it] != '\0')
-        {
-            es[jt] = buf[it];
-            it++; jt++;
-        }
-        req->event = event_from_string(es);
-
+        req->event = event_from_string(arg_string);
     } else if (req->type == REMOVE) {
         printf("Request being built as a REMOVE\n");
-
+        // in this case, the request param will be set to event name
+        req->param = get_single_arg(arg_string);
     } else if (req->type == UPDATE) {
         printf("Request being built as an UPDATE\n");
-
+        // build param as identifier:feild:value
     } else if (req->type == GET)    {
         printf("Request being built as a GET\n");
-
+        req->param = get_single_arg(arg_string);
     } else if (req->type == GETALL) {
         printf("Request being built as an GETALL\n");
-
+        // set param to start_date:end_date
     } else if (req->type == INPUTS) {
         printf("Request being built as a INPUTS\n");
-
+        // put all the inputs into the param
+        req->param = arg_string;
+        // this case we don't free our string
+        return req;
     }
-
+    free(arg_string);
     return req;
+}
+
+char *get_single_arg(char *str){
+    // if there is only one arg for the request, we can use this
+    printf("Remove string: %s\n1234\n", str);
+
+
+    return NULL;
 }
 
 RequestType get_request_type(char* reqType){
@@ -114,7 +128,6 @@ RequestType get_request_type(char* reqType){
     } else {
         tr = -1;
     }
-    free(reqType);
     return tr;
 }
 
@@ -182,6 +195,7 @@ event *event_from_string(char *s)
 
 Calendar *add_event(Calendar *cal, event *e)
 {
+    e->identifier = cal->identifier_counter++;
     if (!cal->head)
     {
         cal->head = e;
@@ -201,7 +215,7 @@ Calendar *add_event(Calendar *cal, event *e)
 }
 
 event *create_event(char *name, char *date, char *time,
-    char *duration, char *location, char* identifier)
+    char *duration, char *location, int identifier)
 {
     if (!(name && date && time && duration && location && identifier))
         return NULL;
@@ -215,12 +229,14 @@ event *create_event(char *name, char *date, char *time,
     return new_event;
 }
 
-int remove_event(Calendar *cal, char *event_name)
+int remove_event(Calendar *cal, int identifier)
 {
     event *ptr = cal->head;
-    while (strcmp(ptr->name,event_name)!=0);
-    if (!ptr)
-        return 1;
+    while (ptr->identifier!=identifier){
+        ptr = ptr->next;
+        if (!ptr)
+            return 1;
+    }
     event *temp = ptr->next;
     ptr->prev->next = ptr->next;
     if (ptr->next)
@@ -327,7 +343,6 @@ int free_event(event *e){
     free(e->time);
     free(e->location);
     free(e->duration);
-    free(e->identifier);
     free(e);
 }
 
@@ -365,6 +380,7 @@ Calendar *load_calendar(char *file_path, char *name)
     cal->name = name;
     cal->count = 0;
     cal->head = NULL;
+    cal->identifier_counter = 0;
 
     if (!fp) {
         printf("Creating file for calendar\n");
@@ -417,15 +433,22 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             add_event(cal, req->event);
             break;
         case REMOVE:
-            remove_event(cal, req->event->name);
+            remove_event(cal, req->event->identifier);
             break;
         case UPDATE:
+            update_event(cal, req->param);
             break;
         defualt:
             break;
     }
 
     return cal;
+}
+
+void update_event(Calendar *cal, char *params){
+    // identifier:feild:value
+    // use that to find and change the requested value
+    return;
 }
 
 int close_request(request *req){
