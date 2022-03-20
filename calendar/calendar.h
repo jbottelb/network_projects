@@ -53,35 +53,32 @@ struct Calendar {
     int    count;
 };
 // let the pretty spacing decieve you into thinking this is organized
-int       free_calendar         (Calendar *cal);
-int       free_event            (event *e);
-request  *request_from_string   (char  *s  );
-event    *event_from_string     (char  *s  );
-char     *string_from_event     (event *e);
 
 char     *get_single_arg        (char *str);
-char     *get_update_params     (char *str);
-char     *get_getall_dates      (char *str);
+char     *get_double_arg        (char *str);
+char     *get_tripple_arg       (char *str);
+int       in_date_range         (char* start, char* end, char *date);
 
-void      dump_calendar         (Calendar *cal);
+Calendar *process_edit_request  (request *req, Calendar *cal);
+event    *create_event          (char *name, char *date, char *time, char *duration, char *location, int identifier);
 Calendar *add_event             (Calendar *cal, event *e);
-int       delete_calendar       (Calendar *cal);
 int       remove_event          (Calendar *cal, char *i_string);
+int       free_event            (event *e);
+void      update_event          (Calendar *cal, char *params);
+int       delete_calendar       (Calendar *cal);
 event  ** get_events_by_date    (Calendar *cal, char* date);
 event  ** get_events_by_range   (Calendar *cal, char* params);
-event    *create_event          (char *name, char *date, char *time, char *duration, char *location, int identifier);
-int       in_date_range         (char* start, char* end, char *date);
-void      update_event          (Calendar *cal, char *params);
-char     *get_tripple_arg       (char *str);
 
-char     *get_double_arg        (char *str);
+void      dump_calendar         (Calendar *cal);
 Calendar *load_calendar         (char *file_path, char *name);
-Calendar *process_edit_request  (request *req, Calendar *cal);
-int       save_request          (request *req, Calendar *fp);
+int       free_calendar         (Calendar *cal);
 
+char     *string_from_event     (event *e);
+event    *event_from_string     (char  *s  );
+request  *request_from_string   (char  *s  );
+int       save_request          (request *req, Calendar *fp);
 request  *create_request        (char *json_string);
 int       close_request         (request *req);
-
 RequestType get_request_type    (char* reqType);
 
 #endif

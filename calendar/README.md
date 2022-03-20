@@ -14,6 +14,9 @@ The server is backed by a calendar library I wrote that handles all the actual
 operations. It writes to disk, and uses append so it is mostly atomic in
 operations.  
 
+The saving works by saving the operations that change the saved state. Then, on
+startup, all the operations that change the data are replayed before additional requests are done. 
+
 
 ###
 

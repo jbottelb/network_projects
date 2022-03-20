@@ -20,8 +20,6 @@ request *request_from_string(char *s)
     request *req = (request*) calloc(1, sizeof(request));
     req->OG = s;
 
-    // printf("%s\n", s);
-
     int l = strlen(s);
     char buf[BUFSIZ] = {0}; // you would not believe how important the {0} is
     int i = 0, j=0;
@@ -106,54 +104,6 @@ request *request_from_string(char *s)
     return req;
 }
 
-char *get_tripple_arg(char *str){
-    // used for start_date end_date
-    // generates ident:feild:value
-    char *params = (char *)calloc(BUFSIZ, sizeof(char));
-    int it = 0, jt = 0;
-    while (str[it++] != ':');
-    while (str[it] != ','){
-        params[jt++] = str[it++];
-    } it ++;
-    params[jt++] = ':';
-    while (str[it] != ':'){
-        params[jt++] = str[it++];
-    }
-    while (str[it] != '\0'){
-        params[jt++] = str[it++];
-    }
-    return params;
-}
-
-char *get_double_arg(char *str){
-    // used for start_date end_date
-    char *params = (char *)calloc(BUFSIZ, sizeof(char));
-    int it = 0, jt = 0;
-    while (str[it++] != ':');
-    while (str[it] != ','){
-        params[jt++] = str[it++];
-    }
-    params[jt++] = ':';
-    while (str[it++] != ':');
-    while (str[it] != '\0'){
-        params[jt++] = str[it++];
-    }
-    return params;
-}
-
-char *get_single_arg(char *str){
-    // if there is only one arg for the request, we can use this
-    char *param = (char *)calloc(BUFSIZ, sizeof(char));
-    int it = 0, jt = 0;
-    while (str[it] != ':') {it++;}
-    it++;
-    while (str[it] != '\0'){
-        param[jt] = str[it];
-        jt++; it++;
-    }
-    return param;
-}
-
 RequestType get_request_type(char* reqType){
     RequestType tr;
     if      (strcmp(reqType, "ADD")    == 0) {
@@ -174,6 +124,54 @@ RequestType get_request_type(char* reqType){
     }
     free(reqType);
     return tr;
+}
+
+char *get_single_arg(char *str){
+    // if there is only one arg for the request, we can use this
+    char *param = (char *)calloc(BUFSIZ, sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it] != ':') {it++;}
+    it++;
+    while (str[it] != '\0'){
+        param[jt] = str[it];
+        jt++; it++;
+    }
+    return param;
+}
+
+char *get_double_arg(char *str){
+    // used for start_date end_date
+    char *params = (char *)calloc(BUFSIZ, sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it++] != ':');
+    while (str[it] != ','){
+        params[jt++] = str[it++];
+    }
+    params[jt++] = ':';
+    while (str[it++] != ':');
+    while (str[it] != '\0'){
+        params[jt++] = str[it++];
+    }
+    return params;
+}
+
+char *get_tripple_arg(char *str){
+    // used for start_date end_date
+    // generates ident:feild:value
+    char *params = (char *)calloc(BUFSIZ, sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it++] != ':');
+    while (str[it] != ','){
+        params[jt++] = str[it++];
+    } it ++;
+    params[jt++] = ':';
+    while (str[it] != ':'){
+        params[jt++] = str[it++];
+    }
+    while (str[it] != '\0'){
+        params[jt++] = str[it++];
+    }
+    return params;
 }
 
 event *event_from_string(char *s)
@@ -261,6 +259,10 @@ char *string_from_event(event *e){
     return str;
 }
 
+
+/*
+    Functions that do the things
+*/
 Calendar *add_event(Calendar *cal, event *e)
 {
     e->identifier = cal->identifier_counter++;
@@ -335,6 +337,52 @@ int remove_event(Calendar *cal, char *i_string)
     cal->count--;
     printf("Removed event successfully. Calendar size: %d\n", cal->count);
     return 0;
+}
+
+void update_event(Calendar *cal, char *params){
+    // identifier:feild:value
+    // use that to find and change the requested value
+    char identifier[BUFSIZ] = {0};
+    char feild[BUFSIZ] = {0};
+    // this is the only one that persists
+    char *value = (char*)calloc(BUFSIZ, sizeof(char));
+
+    int it = 0, jt = 0;
+    while (params[it] != ':'){
+        identifier[jt++] = params[it++];
+    } it++; jt = 0;
+    while (params[it] != ':'){
+        feild[jt++] = params[it++];
+    } it++; jt = 0;
+    while (params[it] != '\0'){
+        value[jt++] = params[it++];
+    }
+    printf("%s %s %s\n", identifier, feild, value);
+    int id = atoi(identifier);
+
+    // find event
+    event *ptr = cal->head;
+    while (ptr){
+        if (ptr->identifier == id){
+            printf("Found the event to update\n");
+            if (strcmp("date", feild) == 0){
+                ptr->date = value;
+            } else if (strcmp("time", feild) == 0)       {
+                ptr->time = value;
+            } else if (strcmp("duration", feild) == 0)   {
+                ptr->duration = value;
+            } else if (strcmp("name", feild) == 0)       {
+                ptr->name = value;
+            } else if (strcmp("description", feild) == 0){
+                ptr->description = value;
+            } else if (strcmp("location", feild) == 0)   {
+                ptr->location = value;
+            } else {
+                printf("Issue with feildname %s\n", feild);
+            }
+        }
+        ptr = ptr->next;
+    }
 }
 
 // Rememver to free the event array!
@@ -472,6 +520,7 @@ int delete_calendar(Calendar *cal)
     return 0;
 }
 
+
 /*
 
 The following code is for dealing with the data on disk (in /data)
@@ -559,51 +608,7 @@ Calendar* process_edit_request(request *req, Calendar *cal)
     return cal;
 }
 
-void update_event(Calendar *cal, char *params){
-    // identifier:feild:value
-    // use that to find and change the requested value
-    char identifier[BUFSIZ] = {0};
-    char feild[BUFSIZ] = {0};
-    // this is the only one that persists
-    char *value = (char*)calloc(BUFSIZ, sizeof(char));
 
-    int it = 0, jt = 0;
-    while (params[it] != ':'){
-        identifier[jt++] = params[it++];
-    } it++; jt = 0;
-    while (params[it] != ':'){
-        feild[jt++] = params[it++];
-    } it++; jt = 0;
-    while (params[it] != '\0'){
-        value[jt++] = params[it++];
-    }
-    printf("%s %s %s\n", identifier, feild, value);
-    int id = atoi(identifier);
-
-    // find event
-    event *ptr = cal->head;
-    while (ptr){
-        if (ptr->identifier == id){
-            printf("Found the event to update\n");
-            if (strcmp("date", feild) == 0){
-                ptr->date = value;
-            } else if (strcmp("time", feild) == 0)       {
-                ptr->time = value;
-            } else if (strcmp("duration", feild) == 0)   {
-                ptr->duration = value;
-            } else if (strcmp("name", feild) == 0)       {
-                ptr->name = value;
-            } else if (strcmp("description", feild) == 0){
-                ptr->description = value;
-            } else if (strcmp("location", feild) == 0)   {
-                ptr->location = value;
-            } else {
-                printf("Issue with feildname %s\n", feild);
-            }
-        }
-        ptr = ptr->next;
-    }
-}
 
 int close_request(request *req){
     free(req);
