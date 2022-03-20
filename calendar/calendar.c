@@ -520,7 +520,6 @@ int delete_calendar(Calendar *cal)
     return 0;
 }
 
-
 /*
 
 The following code is for dealing with the data on disk (in /data)
@@ -607,8 +606,6 @@ Calendar* process_edit_request(request *req, Calendar *cal)
 
     return cal;
 }
-
-
 
 int close_request(request *req){
     free(req);
