@@ -107,6 +107,7 @@ int main(){
     save_request(req_R, cal);
 
     dump_calendar(cal);
+    delete_calendar(cal);
 
     return 0;
 }

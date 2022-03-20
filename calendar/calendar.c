@@ -403,6 +403,7 @@ int free_event(event *e){
     free(e->location);
     free(e->duration);
     free(e);
+    return 0;
 }
 
 int delete_calendar(Calendar *cal)
@@ -410,10 +411,11 @@ int delete_calendar(Calendar *cal)
     event *ptr = cal->head;
     while (ptr){
         event *del = ptr;
-        free_event(del);
+        printf("%s\n", del->name);
         ptr = ptr->next;
+        free_event(del);
     }
-    free(cal->name);
+    close(cal->fp);
     free(cal);
     return 0;
 }
