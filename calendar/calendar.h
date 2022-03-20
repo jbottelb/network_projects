@@ -23,13 +23,13 @@ typedef enum {
 
 typedef struct event event;
 struct event {
-    char *name;
-    char *date;
-    char *time;
-    char *duration;
-    char *location;
-    char *description;
-    int identifier;
+    char  *name;
+    char  *date;
+    char  *time;
+    char  *duration;
+    char  *location;
+    char  *description;
+    int    identifier;
     event *next;
     event *prev;
 };
@@ -37,20 +37,20 @@ struct event {
 typedef struct request request;
 struct request {
     RequestType type;
-    char *OG;           // origonal string for storage
-    char *calName;
-    char *param;         // not used in ADD, for range, start_date:end_date
+    char  *OG;           // origonal string for storage
+    char  *calName;
+    char  *param;        // not used in ADD, for range, start_date:end_date
     event *event;       // only used in ADD
 };
 
 typedef struct Calendar Calendar;
 struct Calendar {
-    char *name;
+    char  *name;
     event *head;
-    char *file_path;
-    int identifier_counter;
-    FILE *fp;
-    int count;
+    char  *file_path;
+    int    identifier_counter;
+    FILE  *fp;
+    int    count;
 };
 // let the pretty spacing decieve you into thinking this is organized
 int       free_calendar         (Calendar *cal);
