@@ -93,6 +93,7 @@ request *request_from_string(char *s)
     } else if (req->type == GETALL) {
         printf("Request being built as an GETALL\n");
         // set param to start_date:end_date
+        req->param = get_double_arg(arg_string);
     } else if (req->type == INPUTS) {
         printf("Request being built as a INPUTS\n");
         // put all the inputs into the param
@@ -102,6 +103,22 @@ request *request_from_string(char *s)
     }
     free(arg_string);
     return req;
+}
+
+char *get_double_arg(char *str){
+    // used for start_date end_date
+    char *params = (char *)calloc(BUFSIZ, sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it++] != ':');
+    while (str[it] != ','){
+        params[jt++] = str[it++];
+    }
+    params[jt++] = ':';
+    while (str[it++] != ':');
+    while (str[it] != '\0'){
+        params[jt++] = str[it++];
+    }
+    return params;
 }
 
 char *get_single_arg(char *str){
@@ -339,8 +356,19 @@ event** get_events_by_date(Calendar *cal, char* date)
     return events;
 }
 
-event** get_events_by_range(Calendar *cal, char* start_date, char* end_date)
+event** get_events_by_range(Calendar *cal, char* params)
 {
+    // break down into start and end
+    char start_date[BUFSIZ] = {0};
+    char end_date[BUFSIZ] = {0};
+    int it = 0, jt = 0;
+    while (params[it] != ':'){
+        start_date[jt++] = params[it++];
+    } it++; jt = 0;
+
+    while (params[it] != '\0'){
+        end_date[jt++] = params[it++];
+    }
     /*
     Literally just the same as the by date, but with the helper
     */
@@ -350,23 +378,28 @@ event** get_events_by_range(Calendar *cal, char* start_date, char* end_date)
     if (!ptr)
         return NULL;
     // go though and find events that count
-    while (ptr->next){
-        if (in_date_range(start_date, end_date, ptr->date)){
+    while (ptr){
+        if (in_date_range(start_date, end_date,ptr->date) == 0){
+            printf("Match: %s %s\n", ptr->date, ptr->date);
             count++;
         }
+        ptr = ptr->next;
     }
+    printf("Events found: %d\n", count);
     // we found none
     if (count == 0)
         return NULL;
     int index = 0;
     // create array for events (should be FREEED!)
-    event ** events = (event**)calloc(count, sizeof(event));
-    while (ptr->next){
-        if (in_date_range(start_date, end_date, ptr->date)){
+    event **events = (event**)calloc(count, sizeof(event));
+    ptr = cal->head;
+    while (ptr){
+        if (in_date_range(start_date, end_date, ptr->date) == 0){
             // add our event
             events[index] = ptr;
             index++;
         }
+        ptr = ptr->next;
     }
     return events;
 }

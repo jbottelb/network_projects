@@ -106,6 +106,30 @@ int main(){
     cal = process_edit_request(req_R, cal);
     save_request(req_R, cal);
 
+    // GETALL
+
+    char w[BUFSIZ] = " \
+    { \
+        \"CALENDAR\": \"JoeC\", \
+        \"Action\": \"GETALL\", \
+        \"Arguments\": { \
+            \"start_date\":  \"111111\", \
+            \"end_date\":  \"999999\" \
+        }\
+    } \
+    ";
+    request* req_all = request_from_string(w);
+    printf("Date Range Param: %s\n", req_all->param);
+    event **range_events = get_events_by_range(cal, req_all->param);
+    if (range_events){
+        printf("First event in returned list: %s\n", range_events[0]->name);
+        printf("Event JSONified: \n%s\n", string_from_event(range_events[0]));
+    }
+    free(range_events);
+
+
+
+
     dump_calendar(cal);
     delete_calendar(cal);
 

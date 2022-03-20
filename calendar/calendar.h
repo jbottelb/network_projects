@@ -68,12 +68,12 @@ Calendar *add_event      (Calendar *cal, event *e);
 int       delete_calendar(Calendar *cal);
 int       remove_event   (Calendar *cal, char *i_string);
 event  ** get_events_by_date(Calendar *cal, char* date);
-event  ** get_events_by_range(Calendar *cal, char* start_date, char* end_date);
+event  ** get_events_by_range(Calendar *cal, char* params);
 event    *create_event(char *name, char *date, char *time, char *duration, char *location, int identifier);
 int       in_date_range(char* start, char* end, char *date);
 void update_event(Calendar *cal, char *params);
 
-
+char *get_double_arg(char *str);
 Calendar *load_calendar(char *file_path, char *name);
 Calendar *process_edit_request(request *req, Calendar *cal);
 int       save_request(request *req, Calendar *fp);
