@@ -87,6 +87,7 @@ request *request_from_string(char *s)
     } else if (req->type == UPDATE) {
         printf("Request being built as an UPDATE\n");
         // build param as identifier:feild:value
+        req->param = get_tripple_arg(arg_string);
     } else if (req->type == GET)    {
         printf("Request being built as a GET\n");
         req->param = get_single_arg(arg_string);
@@ -103,6 +104,25 @@ request *request_from_string(char *s)
     }
     free(arg_string);
     return req;
+}
+
+char *get_tripple_arg(char *str){
+    // used for start_date end_date
+    // generates ident:feild:value
+    char *params = (char *)calloc(BUFSIZ, sizeof(char));
+    int it = 0, jt = 0;
+    while (str[it++] != ':');
+    while (str[it] != ','){
+        params[jt++] = str[it++];
+    } it ++;
+    params[jt++] = ':';
+    while (str[it] != ':'){
+        params[jt++] = str[it++];
+    }
+    while (str[it] != '\0'){
+        params[jt++] = str[it++];
+    }
+    return params;
 }
 
 char *get_double_arg(char *str){
@@ -444,11 +464,10 @@ int delete_calendar(Calendar *cal)
     event *ptr = cal->head;
     while (ptr){
         event *del = ptr;
-        printf("%s\n", del->name);
         ptr = ptr->next;
         free_event(del);
     }
-    close(cal->fp);
+    fclose(cal->fp);
     free(cal);
     return 0;
 }
@@ -510,7 +529,7 @@ void dump_calendar(Calendar *cal){
         return;
     }
     while (curr){
-        printf("%s ", curr->name);
+        printf("NAME: %s TIME: %s \n", curr->name, curr->time);
         curr=curr->next;
     }
     return;
@@ -543,7 +562,47 @@ Calendar* process_edit_request(request *req, Calendar *cal)
 void update_event(Calendar *cal, char *params){
     // identifier:feild:value
     // use that to find and change the requested value
-    return;
+    char identifier[BUFSIZ] = {0};
+    char feild[BUFSIZ] = {0};
+    // this is the only one that persists
+    char *value = (char*)calloc(BUFSIZ, sizeof(char));
+
+    int it = 0, jt = 0;
+    while (params[it] != ':'){
+        identifier[jt++] = params[it++];
+    } it++; jt = 0;
+    while (params[it] != ':'){
+        feild[jt++] = params[it++];
+    } it++; jt = 0;
+    while (params[it] != '\0'){
+        value[jt++] = params[it++];
+    }
+    printf("%s %s %s\n", identifier, feild, value);
+    int id = atoi(identifier);
+
+    // find event
+    event *ptr = cal->head;
+    while (ptr){
+        if (ptr->identifier == id){
+            printf("Found the event to update\n");
+            if (strcmp("date", feild) == 0){
+                ptr->date = value;
+            } else if (strcmp("time", feild) == 0)       {
+                ptr->time = value;
+            } else if (strcmp("duration", feild) == 0)   {
+                ptr->duration = value;
+            } else if (strcmp("name", feild) == 0)       {
+                ptr->name = value;
+            } else if (strcmp("description", feild) == 0){
+                ptr->description = value;
+            } else if (strcmp("location", feild) == 0)   {
+                ptr->location = value;
+            } else {
+                printf("Issue with feildname %s\n", feild);
+            }
+        }
+        ptr = ptr->next;
+    }
 }
 
 int close_request(request *req){

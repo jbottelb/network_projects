@@ -31,7 +31,7 @@ int main(){
             \"date\": 012222, \
             \"time\": 1233, \
             \"duration\": \"indefinite\", \
-            \"name\": \"BD\", \
+            \"name\": \"EVENT 1\", \
             \"description\": \"being mean\", \
             location: \"everywhere\" \
         }\
@@ -57,7 +57,7 @@ int main(){
             \"date\": 111214, \
             \"time\": 1233, \
             \"duration\": \"indefinite\", \
-            \"name\": \"YEAD\", \
+            \"name\": \"EVENT 2\", \
             \"description\": \"being mean\", \
             location: \"everywhere\" \
         }\
@@ -127,7 +127,22 @@ int main(){
     }
     free(range_events);
 
+    dump_calendar(cal);
 
+    char u[BUFSIZ] = " \
+    { \
+        \"CALENDAR\": \"JoeC\", \
+        \"Action\": \"UPDATE\", \
+        \"Arguments\": { \
+            \"identifier\": 1, \
+            \"time\": 0000 \
+        }\
+    } \
+    ";
+
+    request* req_u = request_from_string(u);
+    cal = process_edit_request(req_u, cal);
+    save_request(req_u, cal);
 
 
     dump_calendar(cal);

@@ -35,15 +35,20 @@ int handler()
 
     // build request with string
     // REMEMBER: JSON MUST BE MALLOCED AND FREE
-    // request *req = create_request(revieved strin (malloced))
+    // request *req = create_request(revieved string (malloced))
 
 
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
+    // perhaps have these always open in a big global. up to you.
+    // they should be freed on close though
 
     // IF IT ISNT THERE, IT WILL HAVE TO BE CREATED.
 
-    /*
+
+
+    /* For each case, look at how it is done in testing, as far as
+        // freeing memory and handing endivual things foes
     switch (REQUEST TYPE):
         case ADD_EVENT or REMOVE or UPDATE:
             (this handles all disk stuff)
@@ -54,6 +59,8 @@ int handler()
         case GET_RANGE:
             event **events = get_events_by_range(cal, start, end)
             // build return string off of this
+        case INPUT:
+            good luck.
 
     if we die, free the calendar firsts
     free request too (close_request)
