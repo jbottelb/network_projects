@@ -1,4 +1,5 @@
 ## Calendar Server
+Written By Josh Bottelberghe and Joseph Stalin
 
 
 Constraints:
@@ -15,7 +16,7 @@ operations. It writes to disk, and uses append so it is mostly atomic in
 operations.  
 
 The saving works by saving the operations that change the saved state. Then, on
-startup, all the operations that change the data are replayed before additional requests are done. 
+startup, all the operations that change the data are replayed before additional requests are done.
 
 
 ###

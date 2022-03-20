@@ -16,6 +16,23 @@
 #include "server.h"
 #include "calendar.h"
 
+/*
+    This should give some understanding on how to use the functions in the server
+    as well.
+
+    Each action is seperated between dealing with formatting the request, into
+    executing the request. This helps because that first part is different for
+    reading back actions from disk, but part 2 is the same once the request is 
+    loaded.
+
+    The disk is a file in data by the calendar name, which is just a list of actions
+    which modify the state of the calendar. Anything that changes the state (ie.
+    not GET and GETALL) should be run through save_request(), which appends the
+    json to a line on the file.
+
+    and as always, https://www.youtube.com/watch?v=dQw4w9WgXcQ
+*/
+
 int main(){
     printf("\nComence Testing\n\n");
 

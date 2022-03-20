@@ -1,0 +1,4 @@
+     {         "CALENDAR": "JoeC",         "Action": "ADD",         "Arguments": {             "date": 012222,             "time": 1233,             "duration": "indefinite",             "name": "EVENT 1",             "description": "being mean",             location: "everywhere"         }    }     
+     {         "CALENDAR": "JoeC",         "Action": "ADD",         "Arguments": {             "date": 111214,             "time": 1233,             "duration": "indefinite",             "name": "EVENT 2",             "description": "being mean",             location: "everywhere"         }    }     
+     {         "CALENDAR": "JoeC",         "Action": "REMOVE",         "Arguments": {             "identifier": 0,         }    }     
+     {         "CALENDAR": "JoeC",         "Action": "UPDATE",         "Arguments": {             "identifier": 1,             "time": 0000         }    }     
