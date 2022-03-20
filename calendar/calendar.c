@@ -17,7 +17,7 @@
 
 request *request_from_string(char *s)
 {
-    request *req = (request*) malloc(sizeof(request));
+    request *req = (request*) calloc(1, sizeof(request));
     req->OG = s;
 
     // printf("%s\n", s);
@@ -41,7 +41,7 @@ request *request_from_string(char *s)
         i++;
     }
     // get calendar name
-    char *calName = malloc(BUFSIZ * sizeof(char));
+    char *calName = (char *)calloc(BUFSIZ, sizeof(char));
     int it = 0, jt = 0;
     while (buf[it] != ':') {it++;}
     it++;
@@ -52,7 +52,7 @@ request *request_from_string(char *s)
     req->calName = calName;
 
     // get request type
-    char *reqType = malloc(BUFSIZ * sizeof(char));
+    char *reqType = (char *)calloc(BUFSIZ, sizeof(char));
 
     while (buf[it] != ':') {it++;}
     it++;
@@ -70,7 +70,7 @@ request *request_from_string(char *s)
     while (buf[it] != ':') {it++;}
     it++;
     jt = 0;
-    char *arg_string = malloc(sizeof(char) * BUFSIZ);
+    char *arg_string = (char *)calloc(BUFSIZ, sizeof(char));
     while (buf[it] != '\0')
     {
         arg_string[jt] = buf[it];
@@ -106,7 +106,7 @@ request *request_from_string(char *s)
 
 char *get_single_arg(char *str){
     // if there is only one arg for the request, we can use this
-    char *param = malloc(BUFSIZ * sizeof(char));
+    char *param = (char *)calloc(BUFSIZ, sizeof(char));
     int it = 0, jt = 0;
     while (str[it] != ':') {it++;}
     it++;
@@ -141,9 +141,9 @@ RequestType get_request_type(char* reqType){
 
 event *event_from_string(char *s)
 {
-    event *e = (event *) malloc (sizeof(event));
+    event *e = (event *) calloc (1, sizeof(event));
 
-    char *date = malloc(BUFSIZ * sizeof(char));
+    char *date = (char *)calloc(BUFSIZ, sizeof(char));
     int it = 0, jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -152,7 +152,7 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->date = date;
-    char *time = malloc(BUFSIZ * sizeof(char));
+    char *time = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -161,7 +161,7 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->time = time;
-    char *duration = malloc(BUFSIZ * sizeof(char));
+    char *duration = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -170,7 +170,7 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->duration = duration;
-    char *name = malloc(BUFSIZ * sizeof(char));
+    char *name = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -179,7 +179,7 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->name = name;
-    char *description = malloc(BUFSIZ * sizeof(char));
+    char *description = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -188,7 +188,7 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->description = description;
-    char *location = malloc(BUFSIZ * sizeof(char));
+    char *location = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
@@ -199,6 +199,29 @@ event *event_from_string(char *s)
     e->location = location;
 
     return e;
+}
+
+char *string_from_event(event *e){
+    char *str = (char *)calloc(BUFSIZ, sizeof(char));
+    // STRCAT is dangerous, so if there is an issue, it may be here.
+    strcat(str, "{ \"date\": \"");
+    strcat(str, e->date);
+    strcat(str, "\", \"time\": \"");
+    strcat(str, e->time);
+    strcat(str, "\", \"duration\": \"");
+    strcat(str, e->duration);
+    strcat(str, "\", \"name\": \"");
+    strcat(str, e->name);
+    strcat(str, "\", \"description\": \"");
+    strcat(str, e->description);
+    strcat(str, "\", \"location\": \"");
+    strcat(str, e->location);
+    strcat(str, "\", \"identifier\": \"");
+    char buf[BUFSIZ] = {0};
+    sprintf(buf, "%d", e->identifier);
+    strcat(str, buf);
+    strcat(str, "\" }");
+    return str;
 }
 
 Calendar *add_event(Calendar *cal, event *e)
@@ -228,7 +251,7 @@ event *create_event(char *name, char *date, char *time,
 {
     if (!(name && date && time && duration && location && identifier))
         return NULL;
-    event *new_event = malloc(sizeof(event));
+    event *new_event = (event *)calloc(1, sizeof(event));
     new_event->name = name;
     new_event->date = date;
     new_event->time = time;
@@ -282,7 +305,7 @@ event** get_events_by_date(Calendar *cal, char* date)
 {
     /*
     First, find how many events we have, then create an malloc an event array to
-    hold them, then add them. That's C for ya
+    hold them, then add them. That's C for ya [maybe im just bads]
     */
     int count = 0;
     event *ptr = cal->head;
@@ -290,23 +313,28 @@ event** get_events_by_date(Calendar *cal, char* date)
     if (!ptr)
         return NULL;
     // go though and find events that count
-    while (ptr->next){
-        if (strcmp(ptr->name, date)){
+    while (ptr){
+        if (strcmp(ptr->date, date) == 0){
+            printf("Match: %s %s\n", ptr->date, date);
             count++;
         }
+        ptr = ptr->next;
     }
+    printf("Events found: %d\n", count);
     // we found none
     if (count == 0)
         return NULL;
     int index = 0;
     // create array for events (should be FREEED!)
-    event **events = (event**)malloc(count * sizeof(event));
-    while (ptr->next){
-        if (strcmp(ptr->name, date)){
+    event **events = (event**)calloc(count, sizeof(event));
+    ptr = cal->head;
+    while (ptr){
+        if (strcmp(ptr->date, date) == 0){
             // add our event
             events[index] = ptr;
             index++;
         }
+        ptr = ptr->next;
     }
     return events;
 }
@@ -332,7 +360,7 @@ event** get_events_by_range(Calendar *cal, char* start_date, char* end_date)
         return NULL;
     int index = 0;
     // create array for events (should be FREEED!)
-    event ** events = (event**)malloc(count * sizeof(event));
+    event ** events = (event**)calloc(count, sizeof(event));
     while (ptr->next){
         if (in_date_range(start_date, end_date, ptr->date)){
             // add our event
@@ -406,7 +434,7 @@ Calendar *load_calendar(char *file_path, char *name)
         printf("Failed to open file\n");
     }
 
-    Calendar *cal = (Calendar *)malloc(sizeof(Calendar));
+    Calendar *cal = (Calendar *)calloc(1, sizeof(Calendar));
     cal->file_path = file_path;
     cal->name = name;
     cal->count = 0;
