@@ -10,7 +10,8 @@ server: server.o calendar.o
 
 test: test.o calendar.o
 	$(CC) -o test calendar.o test.o
-	./test
+
+all: server test
 
 clean:
 	echo "CLEAN REMOVES DATA TOO"
