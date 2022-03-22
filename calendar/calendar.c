@@ -600,14 +600,14 @@ Calendar* process_edit_request(request *req, Calendar *cal)
         case UPDATE:
             update_event(cal, req->param);
             break;
-        defualt:
+        default:
             break;
     }
 
     return cal;
 }
 
-int close_request(request *req){
+void close_request(request *req){
     free(req);
 }
 

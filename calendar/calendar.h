@@ -78,7 +78,7 @@ event    *event_from_string     (char  *s  );
 request  *request_from_string   (char  *s  );
 int       save_request          (request *req, Calendar *fp);
 request  *create_request        (char *json_string);
-int       close_request         (request *req);
+void      close_request         (request *req);
 RequestType get_request_type    (char* reqType);
 
 #endif
