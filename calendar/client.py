@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''
 Client for Calendar
 Python 3, Joe and Josh
