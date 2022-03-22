@@ -20,7 +20,6 @@
 #include "server.h"
 #include "calendar.h"
 
-
 #define PORT "41069"  // the port users will be connecting to
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold

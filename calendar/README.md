@@ -1,5 +1,5 @@
 ## Calendar Server
-Written By Josh Bottelberghe and Joseph Stalin
+Written By Josh Bottelberghe and Joseph Sweilem
 
 
 Constraints:
@@ -11,7 +11,7 @@ Information exchange in JSON
 
 
 ### Information
-The server is backed by a calendar library I wrote that handles all the actual
+The server is backed by a calendar library we wrote that handles all the actual
 operations. It writes to disk, and uses append so it is mostly atomic in
 operations.  
 

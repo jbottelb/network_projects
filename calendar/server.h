@@ -14,9 +14,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-
-
-
 void sigchld_handler(int s);
 char *get_filename_from_client(int sock);
 void send_file_to_socket(FILE* file_fd, int sock_fd);
