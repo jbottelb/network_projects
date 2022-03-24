@@ -227,12 +227,6 @@ char *get_filename_from_client(int sock)
     int file_size, numbytes;
     char buf[SIZE];
 
-    // Receives file name length from client
-    if ((file_size = recv(sock, buf, 2, 0)) == -1) {
-        printf("server: file name length was not received. \n");
-        exit(1);
-    }
-
     // Receives file name from client
     if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
         printf("server: file name was not received. \n");
@@ -241,7 +235,7 @@ char *get_filename_from_client(int sock)
 
     // Add null terminator
     buf[numbytes] = '\0';
-    printf("server: received file_name '%s'\n", buf);
+    printf("server: received file_name\n%s\n", buf);
 
     char *buff_pointer = buf;
     return buff_pointer;

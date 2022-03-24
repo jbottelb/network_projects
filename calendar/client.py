@@ -4,7 +4,7 @@
 Client for Calendar
 Python 3, Joe and Josh
 '''
-import socket, sys, time
+import socket, sys
 import json
 
 ADDR = ("localhost", 41069)
@@ -12,7 +12,7 @@ ADDR = ("localhost", 41069)
 def main():
     # TODO: validate length
     l = len(sys.argv)
-    if l < 3 or (l % 2 == 0 and l > 5):
+    if l < 3:
         print("WRONG", len(sys.argv))
         exit(1)
 

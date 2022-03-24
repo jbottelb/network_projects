@@ -14,5 +14,4 @@ test: test.o calendar.o
 all: server test
 
 clean:
-	echo "CLEAN REMOVES DATA TOO"
 	rm *.o server test data/*
