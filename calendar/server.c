@@ -50,35 +50,43 @@ void handler(int new_fd)
     printf("path: %s\n", path);
     Calendar *cal = load_calendar(path, req->calName);
 
-    printf("here\n");
-
     // perhaps have these always open in a big global. up to you.
     // they should be freed on close though
 
     // IF IT ISNT THERE, IT WILL HAVE TO BE CREATED.
 
-
-
+    
     /* For each case, look at how it is done in testing, as far as
         // freeing memory and handing endivual things foes
-    switch (REQUEST TYPE):
-        case ADD_EVENT or REMOVE or UPDATE:
-            (this handles all disk stuff)
-            cal = process_edit_request(request string, type, cal);
-        case GET:
-            event **events = get_events_by_date(Calendar *cal, char* date);
-            // build return string off of this
-        case GET_RANGE:
-            event **events = get_events_by_range(cal, start, end)
-            // build return string off of this
-        case INPUT:
-            good luck.
-
-    if we die, free the calendar firsts
-    free request too (close_request)
     */
+    switch(req->type) {
+        case 0:
+        case 1:
+        case 2:
+            cal = process_edit_request(req, cal);
+            save_request(req, cal);
+            printf("add remove update \n");
+            break;
+        case 3:
+            event **events = get_events_by_date(cal, req->param);
+            free(events);
+            printf("get \n");
+            break;
+        case 4:
+            event **events = get_events_by_range(cal, req->param);
+            free(events);
+            printf("getall \n");
+            break;
+        case 5:
+            printf("inputs \n");
+            break;
+        default:
+            printf("invalid request type \n");
+    }
 
-   close_request(req);
+    // unleash
+    close_request(req);
+    free(cal);
 }
 
 int main(int argc, char *argv[])
