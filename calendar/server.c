@@ -24,21 +24,34 @@
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold
 
-int handler()
+void handler(int new_fd)
 {
     // handles the requests from the client
     // (I am outlining to show how to use the calendar class)
     // (handle the input file like a serialization of requests)
-
-    // take request from client
-
+    
+    // get request from client
     // build request with string
-    // REMEMBER: JSON MUST BE MALLOCED AND FREE
     // request *req = create_request(revieved string (malloced))
+    request *req = accept_request(new_fd);
+    printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
 
+    // REMEMBER: JSON MUST BE MALLOCED AND FREE
 
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
+
+    char *path = (char *)calloc(BUFSIZ, sizeof(char));
+    char *folder = "data/";
+
+    path = strcpy(path, folder);
+    path = strcat(path, req->calName);
+
+    printf("path: %s\n", path);
+    Calendar *cal = load_calendar(path, req->calName);
+
+    printf("here\n");
+
     // perhaps have these always open in a big global. up to you.
     // they should be freed on close though
 
@@ -64,7 +77,8 @@ int handler()
     if we die, free the calendar firsts
     free request too (close_request)
     */
-    return 0;
+
+   close_request(req);
 }
 
 int main(int argc, char *argv[])
@@ -78,11 +92,12 @@ int main(int argc, char *argv[])
     char s[INET6_ADDRSTRLEN];
     int rv;
     char *port;
+    int mt = -1;
 
+    port = PORT;
+    
     if (argc == 2)
-        port = argv[1];
-    else
-        port = PORT;
+        mt = 0;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -152,16 +167,23 @@ int main(int argc, char *argv[])
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        char *path = (char *)calloc(BUFSIZ, sizeof(char));
-        path = "data/JoeC";
-        Calendar *cal = load_calendar(path, "JoeC");
+        if (mt != -1) {
+            signal(SIGCHLD, SIG_IGN);
 
-        // Get request from client
-        request *req = accept_request(new_fd);
+	        /* Fork off child process to handle request */
+            pid_t pid = fork();
 
-        //printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
-
-        printf("we fucking made it\n");
+            if(pid < 0){
+                continue;
+            }
+            else if(pid == 0) {
+                handler(new_fd);
+                exit(0);
+            }
+        }
+        else {
+            handler(new_fd);
+        }
 
         // Closes socket and returns to listening for new connections
         close(new_fd);
@@ -201,7 +223,7 @@ request *accept_request(int sock)
 
     // Receives file name from client
     if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
-        printf("server: file name was not received. \n");
+        printf("server: request was not received. \n");
         exit(1);
     }
 

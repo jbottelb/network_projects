@@ -214,6 +214,8 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->name = name;
+
+    /*
     char *description = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
     while (s[it] != ':') {it++;}
@@ -232,6 +234,10 @@ event *event_from_string(char *s)
         jt++; it++;
     }
     e->location = location;
+    */
+    e->description = "not yet";
+    e->location = "coming soon";
+    
 
     return e;
 }
