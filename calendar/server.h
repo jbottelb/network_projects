@@ -13,9 +13,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "calendar.h"
 
 void sigchld_handler(int s);
-char *get_filename_from_client(int sock);
+request *accept_request(int sock);
 void send_file_to_socket(FILE* file_fd, int sock_fd);
 
 // get sockaddr, IPv4 or IPv6:

@@ -152,44 +152,16 @@ int main(int argc, char *argv[])
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        // Get file name from client
-        char* file_name = get_filename_from_client(new_fd);
+        char *path = (char *)calloc(BUFSIZ, sizeof(char));
+        path = "data/JoeC";
+        Calendar *cal = load_calendar(path, "JoeC");
 
-        // Check if filename exists and open it
-        FILE *fp = fopen(file_name, "r");
-        if (!fp)
-        {
-          printf("server: file does not exist. \n");
-          close(new_fd);
-          exit(1);
-        }
+        // Get request from client
+        request *req = accept_request(new_fd);
 
-        // Move file pointer to end of file
-        if (fseek(fp, 0L, SEEK_END) != 0) {
-            printf("server: error in reaching EOF. \n");
-            exit(1);
-        }
+        //printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
 
-        // Grab size of file from file pointer
-        uint32_t file_size = ftell(fp);
-
-        // Convert from host order to network long order
-        file_size = htonl(file_size);
-
-        // Send file size to client
-        if (send(new_fd, (char *) &file_size, sizeof(uint32_t), 0) == -1) {
-            printf("server: file size failed to send. \n");
-            exit(1);
-        }
-
-        // Move file pointer back to start of file for reading
-        if (fseek(fp, 0L, SEEK_SET) != 0) {
-            printf("server: error in reaching beginning of file. \n");
-            exit(1);
-        }
-
-        // Sends the file in packets to client
-        send_file_to_socket(fp, new_fd);
+        printf("we fucking made it\n");
 
         // Closes socket and returns to listening for new connections
         close(new_fd);
@@ -222,7 +194,7 @@ void send_file_to_socket(FILE* fp, int sockfd)
     }
 }
 
-char *get_filename_from_client(int sock)
+request *accept_request(int sock)
 {
     int file_size, numbytes;
     char buf[SIZE];
@@ -235,10 +207,10 @@ char *get_filename_from_client(int sock)
 
     // Add null terminator
     buf[numbytes] = '\0';
-    printf("server: received file_name\n%s\n", buf);
+    printf("server: received request\n%s\n", buf);
 
-    char *buff_pointer = buf;
-    return buff_pointer;
+    request *request = request_from_string(buf);
+    return request;
 }
 
 void *get_in_addr(struct sockaddr *sa)
