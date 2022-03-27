@@ -34,7 +34,6 @@ void handler(int new_fd)
     // build request with string
     // request *req = create_request(revieved string (malloced))
     request *req = accept_request(new_fd);
-    printf("%s, %s, %s, %s, %s\n", req->event->name, req->event->date, req->event->time,req->event-> duration, req->event->description);
 
     // REMEMBER: JSON MUST BE MALLOCED AND FREE
 
@@ -47,46 +46,41 @@ void handler(int new_fd)
     path = strcpy(path, folder);
     path = strcat(path, req->calName);
 
-    printf("path: %s\n", path);
+    //printf("path: %s\n", path);
     Calendar *cal = load_calendar(path, req->calName);
-
-    // perhaps have these always open in a big global. up to you.
-    // they should be freed on close though
-
-    // IF IT ISNT THERE, IT WILL HAVE TO BE CREATED.
-
     
-    /* For each case, look at how it is done in testing, as far as
-        // freeing memory and handing endivual things foes
-    */
     switch(req->type) {
         case 0:
         case 1:
         case 2:
+        {
             cal = process_edit_request(req, cal);
             save_request(req, cal);
-            printf("add remove update \n");
             break;
+        }
         case 3:
+        {
             event **events = get_events_by_date(cal, req->param);
             free(events);
-            printf("get \n");
             break;
+        }
         case 4:
+        {
             event **events = get_events_by_range(cal, req->param);
             free(events);
-            printf("getall \n");
             break;
+        }
         case 5:
-            printf("inputs \n");
+        {
             break;
+        }
         default:
             printf("invalid request type \n");
     }
 
     // unleash
-    close_request(req);
-    free(cal);
+    //close_request(req);
+    //free(cal);
 }
 
 int main(int argc, char *argv[])

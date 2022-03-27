@@ -537,10 +537,7 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = fopen(file_path, "ra");
-    if (!fp){
-        printf("Failed to open file\n");
-    }
+    FILE *fp = fopen(file_path, "r+");
 
     Calendar *cal = (Calendar *)calloc(1, sizeof(Calendar));
     cal->file_path = file_path;
@@ -549,7 +546,7 @@ Calendar *load_calendar(char *file_path, char *name)
     cal->head = NULL;
     cal->identifier_counter = 0;
 
-    if (!fp) {
+    if (!fp){
         printf("Creating file for calendar\n");
         fp = fopen(file_path, "a");
         if (!fp) {
@@ -623,12 +620,14 @@ int save_request(request *req, Calendar *cal)
     // If we are too slow, we need to fix this
     // Adds request string to the file
     FILE *fp;
+    printf("here\n");
     if (cal->fp){
         fp = cal->fp;
     } else {
         printf("Reopening file, something went wrong\n");
-        fp = fopen("data/JoeC", "a");
+        fp = fopen(cal->file_path, "a");
     }
+    printf("og string: %s", req->OG);
     fputs(req->OG, fp);
     fputs("\n", fp);
     fflush(fp);

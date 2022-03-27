@@ -42,7 +42,7 @@ int main(){
     printf("\nCal init size: %d\n", cal->count);
     char s[BUFSIZ] = " \
     { \
-        \"CALENDAR\": \"JoeC\", \
+        \"CALENDAR\": \"NoC\", \
         \"Action\": \"ADD\", \
         \"Arguments\": { \
             \"date\": 012222, \
@@ -65,6 +65,7 @@ int main(){
     // Must be done AFTER processing,
     // otherwise it won't have an identifier.
     save_request(req, cal);
+
 
     char t[BUFSIZ] = " \
     { \
@@ -160,8 +161,7 @@ int main(){
     request* req_u = request_from_string(u);
     cal = process_edit_request(req_u, cal);
     save_request(req_u, cal);
-
-
+   
     dump_calendar(cal);
     delete_calendar(cal);
 

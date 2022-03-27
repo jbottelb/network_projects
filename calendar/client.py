@@ -34,10 +34,28 @@ def send_request(req):
 def build_data():
     request = {}
     request["CALENDAR"] = sys.argv[1]
-    request["ACTION"]   = sys.argv[2]
+    request["ACTION"]   = (sys.argv[2]).upper()
     args = {}
-    for i in range(3, len(sys.argv)-1, 2):
-        args[sys.argv[i]] = sys.argv[i+1]
+
+    if sys.argv[2] == "add":
+        for i in range(3, len(sys.argv)-1, 2):
+            args[sys.argv[i]] = sys.argv[i+1]
+    elif sys.argv[2] == "remove":
+        args["identifier"] = sys.argv[3]
+    elif sys.argv[2] == "update":
+        args["identifier"] = sys.argv[3]
+        args[sys.argv[4]] = sys.argv[5]
+    elif sys.argv[2] == "get":
+        args["date"] = sys.argv[3]
+    elif sys.argv[2] == "getall":
+        args["start_date"] = sys.argv[3]
+        args["end_date"] = sys.argv[4]
+    elif sys.argv[2] == "input":
+        pass
+    else:
+        print("Invalid Command")
+        exit(1)
+
     request["ARGUMENTS"] = args
     return request
 
