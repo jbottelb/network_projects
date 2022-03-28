@@ -82,8 +82,6 @@ int main(){
     } \
     ";
 
-    // dump_calendar(cal);
-
     request* req3 = request_from_string(t);
     cal = process_edit_request(req3, cal);
     save_request(req3, cal);

@@ -626,7 +626,6 @@ int save_request(request *req, Calendar *cal)
     } else {
         printf("Reopening file, something went wrong\n");
         fp = fopen(cal->file_path, "a");
-        printf("here 2\n");
     }
     printf("og string: %s", req->OG);
     fputs(req->OG, fp);

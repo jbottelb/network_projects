@@ -53,7 +53,7 @@ def build_data():
     elif sys.argv[2] == "input":
         pass
     else:
-        print("Invalid Command")
+        print("Invalid Command: Try Again")
         exit(1)
 
     request["ARGUMENTS"] = args
