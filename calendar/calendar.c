@@ -627,7 +627,12 @@ int save_request(request *req, Calendar *cal)
         printf("Reopening file, something went wrong\n");
         fp = fopen(cal->file_path, "a");
     }
-    printf("og string: %s", req->OG);
+    if (!req->OG){
+        printf("Original string not found, not writing to file\n");
+        close_request(req);
+        return 1;
+    }
+    printf("og string: %s\n", req->OG);
     fputs(req->OG, fp);
     fputs("\n", fp);
     fflush(fp);
