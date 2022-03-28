@@ -24,7 +24,7 @@
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold
 
-struct Calendar calendars[128]; 
+Calendar *calendars[128]; 
 
 void handler(int new_fd)
 {
@@ -45,14 +45,16 @@ void handler(int new_fd)
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
     for (int i = 0; i < 128; i++) {
-        if (strcmp(calendars[i]->name, req->calName) == 0) {
-            flag = 0;
-            cal = calendars[i];
-            break;
+        if(calendars[i]) {
+            if (strcmp(calendars[i]->name, req->calName) == 0) {
+                flag = 0;
+                cal = calendars[i];
+                break;
+            }
         }
     }
 
-    if (flag = 1) {
+    if (flag == 1) {
         char *path = (char *)calloc(BUFSIZ, sizeof(char));
         char *folder = "data/";
 
@@ -60,10 +62,11 @@ void handler(int new_fd)
         path = strcat(path, req->calName);
 
         cal = load_calendar(path, req->calName);
-        
+
         for (int i = 0; i < 128; i++) {
-            if (calendars[i] == NULL) {
+            if (!calendars[i]) {
                 calendars[i] = cal;
+                break;
             }
         }
     }
