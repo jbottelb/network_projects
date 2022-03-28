@@ -504,11 +504,11 @@ int in_date_range(char* start, char* end, char *date)
 }
 
 int free_event(event *e){
-    free(e->name);
-    free(e->date);
-    free(e->time);
-    free(e->location);
-    free(e->duration);
+    // free(e->name);
+    // free(e->date);
+    // free(e->time);
+    // free(e->location);
+    // free(e->duration);
     free(e);
     return 0;
 }
@@ -581,7 +581,7 @@ void dump_calendar(Calendar *cal){
         return;
     }
     while (curr){
-        printf("NAME: %s TIME: %s \n", curr->name, curr->time);
+        printf("NAME: %s TIME: %s Identifier: %d \n", curr->name, curr->time, curr->identifier);
         curr=curr->next;
     }
     return;
@@ -621,7 +621,6 @@ int save_request(request *req, Calendar *cal)
     // If we are too slow, we need to fix this
     // Adds request string to the file
     FILE *fp;
-    printf("here\n");
     if (cal->fp){
         fp = cal->fp;
     } else {
