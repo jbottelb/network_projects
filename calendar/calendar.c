@@ -237,7 +237,7 @@ event *event_from_string(char *s)
     */
     e->description = "not yet";
     e->location = "coming soon";
-    
+
 
     return e;
 }
@@ -537,7 +537,7 @@ to impliment in C. There is no other reason.
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
-    FILE *fp = fopen(file_path, "r+");
+    FILE *fp = fopen(file_path, "ra");
 
     Calendar *cal = (Calendar *)calloc(1, sizeof(Calendar));
     cal->file_path = file_path;
@@ -548,6 +548,7 @@ Calendar *load_calendar(char *file_path, char *name)
 
     if (!fp){
         printf("Creating file for calendar\n");
+        printf("Calendar path: %s\n", cal->file_path);
         fp = fopen(file_path, "a");
         if (!fp) {
             printf("Failed to create file\n");
