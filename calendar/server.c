@@ -24,6 +24,8 @@
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold
 
+struct Calendar calendars[128]; 
+
 void handler(int new_fd)
 {
     // handles the requests from the client
@@ -34,20 +36,37 @@ void handler(int new_fd)
     // build request with string
     // request *req = create_request(revieved string (malloced))
     request *req = accept_request(new_fd);
+    Calendar *cal;
+
+    int flag = 1;
 
     // REMEMBER: JSON MUST BE MALLOCED AND FREE
 
     // load appropriate calendar
     // Calendar *cal = load_calendar(name + .cal, name)
+    for (int i = 0; i < 128; i++) {
+        if (strcmp(calendars[i]->name, req->calName) == 0) {
+            flag = 0;
+            cal = calendars[i];
+            break;
+        }
+    }
 
-    char *path = (char *)calloc(BUFSIZ, sizeof(char));
-    char *folder = "data/";
+    if (flag = 1) {
+        char *path = (char *)calloc(BUFSIZ, sizeof(char));
+        char *folder = "data/";
 
-    path = strcpy(path, folder);
-    path = strcat(path, req->calName);
+        path = strcpy(path, folder);
+        path = strcat(path, req->calName);
 
-    //printf("path: %s\n", path);
-    Calendar *cal = load_calendar(path, req->calName);
+        cal = load_calendar(path, req->calName);
+        
+        for (int i = 0; i < 128; i++) {
+            if (calendars[i] == NULL) {
+                calendars[i] = cal;
+            }
+        }
+    }
     
     switch(req->type) {
         case 0:
