@@ -77,10 +77,11 @@ void handler(int new_fd)
         default:
             printf("invalid request type \n");
     }
-
+    /*
     // unleash
-    //close_request(req);
-    //free(cal);
+    close_request(req);
+    free(cal);
+    */
 }
 
 int main(int argc, char *argv[])
