@@ -106,17 +106,17 @@ request *request_from_string(char *s)
 
 RequestType get_request_type(char* reqType){
     RequestType tr;
-    if      (strcmp(reqType, "ADD")    == 0) {
+    if      ((strcmp(reqType, "ADD")    == 0) || (strcmp(reqType, "add")    == 0)){
         tr = ADD;
-    } else if (strcmp(reqType, "REMOVE") == 0) {
+    } else if ((strcmp(reqType, "REMOVE") == 0) || (strcmp(reqType, "remove") == 0)) {
         tr = REMOVE;
-    } else if (strcmp(reqType, "UPDATE") == 0) {
+    } else if ((strcmp(reqType, "UPDATE") == 0) || (strcmp(reqType, "update") == 0)) {
         tr = UPDATE;
-    } else if (strcmp(reqType, "GET"   ) == 0) {
+    } else if ((strcmp(reqType, "GET"   ) == 0) || (strcmp(reqType, "get"   ) == 0)) {
         tr = GET;
-    } else if (strcmp(reqType, "GETALL") == 0) {
+    } else if ((strcmp(reqType, "GETALL") == 0) || (strcmp(reqType, "getall") == 0)) {
         tr = GETALL;
-    } else if (strcmp(reqType, "INPUTS") == 0) {
+    } else if ((strcmp(reqType, "INPUTS") == 0) || (strcmp(reqType, "inputs") == 0)){
         tr = INPUTS;
     } else {
         printf("Invalid type, got: %s\n", reqType);
@@ -178,6 +178,8 @@ event *event_from_string(char *s)
 {
     event *e = (event *) calloc (1, sizeof(event));
 
+    printf("string: %s\n", s);
+
     char *date = (char *)calloc(BUFSIZ, sizeof(char));
     int it = 0, jt = 0;
     while (s[it] != ':') {it++;}
@@ -209,35 +211,64 @@ event *event_from_string(char *s)
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
-    while (s[it] != ','){
+    while ((s[it] != '\0') || (s[it] != ',')){ // not sure why but it segfaults here when there are no more additional arguments
         name[jt] = s[it];
         jt++; it++;
     }
     e->name = name;
 
-    /*
-    char *description = (char *)calloc(BUFSIZ, sizeof(char));
-    jt = 0;
-    while (s[it] != ':') {it++;}
-    it++;
-    while (s[it] != ','){
-        description[jt] = s[it];
-        jt++; it++;
+    if (s[it] == '\0') {
+        e->description = "N/A";
+        e->location = "N/A";
+        return e;
     }
-    e->description = description;
-    char *location = (char *)calloc(BUFSIZ, sizeof(char));
-    jt = 0;
-    while (s[it] != ':') {it++;}
-    it++;
-    while (s[it] != '\0'){
-        location[jt] = s[it];
-        jt++; it++;
-    }
-    e->location = location;
-    */
-    e->description = "not yet";
-    e->location = "coming soon";
 
+    char *description = (char *)calloc(BUFSIZ, sizeof(char));
+    char *location = (char *)calloc(BUFSIZ, sizeof(char));
+    char *check = (char *)calloc(BUFSIZ, sizeof(char));
+
+    it++;
+    jt = 0;
+    while (s[it] != ':') {
+        check[jt] = s[it];
+        jt++, it++;
+    }
+    it++;
+
+    printf("check: %s\n", check);
+
+    if (strcmp(check, "description") == 0) {
+        jt = 0;
+        while ((s[it] != ',') || (s[it] != '\0')){
+            description[jt] = s[it];
+            jt++; it++;
+        }
+        e->description = description;
+
+        if (s[it] == '\0') {
+            e->location = "N/A";
+            return e;
+        }
+
+        jt = 0;
+        while (s[it] != ':') {it++;}
+        it++;
+        while (s[it] != '\0'){
+            location[jt] = s[it];
+            jt++; it++;
+        }
+        e->location = location;
+    }
+    else {
+        e->description = "N/A";
+        while (s[it] != '\0'){
+            location[jt] = s[it];
+            jt++; it++;
+        }
+        e->location = location;
+    }
+
+    printf("%s\n %s\n %s\n %s\n %s\n %s\n", e->date, e->time, e->duration, e->name, e->description, e->location);
 
     return e;
 }
@@ -345,7 +376,7 @@ int remove_event(Calendar *cal, char *i_string)
     return 0;
 }
 
-void update_event(Calendar *cal, char *params, request *req){
+void update_event(Calendar *cal, char *params){
     // identifier:feild:value
     // use that to find and change the requested value
     char *identifier = (char*)calloc(BUFSIZ, sizeof(char));
@@ -605,7 +636,7 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             remove_event(cal, req->param);
             break;
         case UPDATE:
-            update_event(cal, req->param, req);
+            update_event(cal, req->param);
             break;
         default:
             break;

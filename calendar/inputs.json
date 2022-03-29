@@ -1,0 +1,12 @@
+[{"CALENDAR": "JoeC", "ACTION": "ADD", "ARGUMENTS": {"date": "022322", "time": "1100", "duration": "60", "name": "Quiz", "description": "CSE 30264 Quiz Due"}},
+{"CALENDAR": "JoeC", "ACTION": "ADD", "ARGUMENTS": {"date": "022322", "time": "1100", "duration": "60", "name": "Quiz", "description": "CSE 30264 Quiz Due"}},
+{"CALENDAR": "JoeC", "ACTION": "ADD", "ARGUMENTS": {"date": "022322", "time": "1100", "duration": "60", "name": "Quiz", "description": "CSE 30264 Quiz Due"}},
+{"CALENDAR": "JoeC", "ACTION": "ADD", "ARGUMENTS": {"date": "022322", "time": "1100", "duration": "60", "name": "Quiz", "description": "CSE 30264 Quiz Due"}},
+{"CALENDAR": "JoeC", "ACTION": "ADD", "ARGUMENTS": {"date": "022322", "time": "1100", "duration": "60", "name": "Quiz", "description": "CSE 30264 Quiz Due"}},
+{"CALENDAR": "JoeC", "ACTION": "REMOVE", "ARGUMENTS": {"identifier": "2"}},
+{"CALENDAR": "JoeC", "ACTION": "REMOVE", "ARGUMENTS": {"identifier": "3"}},
+{"CALENDAR": "JoeC", "ACTION": "UPDATE", "ARGUMENTS": {"identifier": "0", "time": "2321"}},
+{"CALENDAR": "JoeC", "ACTION": "UPDATE", "ARGUMENTS": {"identifier": "1", "date": "112321"}},
+{"CALENDAR": "JoeC", "ACTION": "GET", "ARGUMENTS": {"date": "112321"}},
+{"CALENDAR": "JoeC", "ACTION": "GET", "ARGUMENTS": {"date": "022322"}},
+{"CALENDAR": "JoeC", "ACTION": "GETALL", "ARGUMENTS": {"start_date": "022320", "end_date": "112322"}}]

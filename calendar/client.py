@@ -16,12 +16,19 @@ def main():
         print("WRONG", len(sys.argv))
         exit(1)
 
-    data = build_data()
-    print(data)
+    if sys.argv[2] == "input":
+        inputs = open(sys.argv[3])
+        data = json.load(inputs)
+        
+        for command in data:
+            response = send_request(command)
+            print(response)
+    else:
+        data = build_data()
+        print(data)
 
-    response = send_request(data)
-
-    print(response)
+        response = send_request(data)
+        print(response)
 
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -50,8 +57,6 @@ def build_data():
     elif sys.argv[2] == "getall":
         args["start_date"] = sys.argv[3]
         args["end_date"] = sys.argv[4]
-    elif sys.argv[2] == "input":
-        pass
     else:
         print("Invalid Command: Try Again")
         exit(1)
