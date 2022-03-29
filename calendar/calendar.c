@@ -168,7 +168,7 @@ char *get_tripple_arg(char *str){
     while (str[it] != ':'){
         params[jt++] = str[it++];
     }
-    while (str[it] != '\0'){
+    while (str[it] != '\0' && str[it] != '\n'){
         params[jt++] = str[it++];
     }
     return params;
