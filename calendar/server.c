@@ -77,7 +77,8 @@ void handler(int new_fd)
         case 2:
         {
             cal = process_edit_request(req, cal);
-            save_request(req, cal);
+            int success = save_request(req, cal);
+            send_result_to_client(new_fd, success, req);
             break;
         }
         case 3:
@@ -219,23 +220,18 @@ int main(int argc, char *argv[])
 
 
 
-void send_file_to_socket(FILE* fp, int sockfd)
+void send_result_to_client(int sockfd, int success, request *req)
 {
-    int numbytes, numread;
-    char data[SIZE];
+    int numread;
+    char *data = (char *)calloc(BUFSIZ, sizeof(char));
 
-    // Loop until all data is sen
-    while((numbytes = fread(data, sizeof(char), SIZE, fp)) == SIZE) {
-        // Sends the packet to the client
-        if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
-            printf("server: error sending data packet. \n");
-            exit(1);
-        }
-        bzero(data, SIZE);
-    }
+    strcat(data, "{\"command\": \"");
+    strcat(data, req->type);
+    strcat(data, "\", \"calendar\": \"");
+    strcat(data, req->calName);
 
     // Handles edge case where the read is smaller than the buffer size
-    if ((numread = send(sockfd, data, numbytes, 0)) == -1) {
+    if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
             printf("server: error sending data packet. \n");
             exit(1);
     }

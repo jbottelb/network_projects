@@ -211,7 +211,7 @@ event *event_from_string(char *s)
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
-    while ((s[it] != '\0') || (s[it] != ',')){ // not sure why but it segfaults here when there are no more additional arguments
+    while ((s[it] != ',') || (s[it] != '\0')){ // not sure why but it segfaults here when there are no more additional arguments
         name[jt] = s[it];
         jt++; it++;
     }
@@ -223,8 +223,6 @@ event *event_from_string(char *s)
         return e;
     }
 
-    char *description = (char *)calloc(BUFSIZ, sizeof(char));
-    char *location = (char *)calloc(BUFSIZ, sizeof(char));
     char *check = (char *)calloc(BUFSIZ, sizeof(char));
 
     it++;
@@ -238,6 +236,7 @@ event *event_from_string(char *s)
     printf("check: %s\n", check);
 
     if (strcmp(check, "description") == 0) {
+        char *description = (char *)calloc(BUFSIZ, sizeof(char));
         jt = 0;
         while ((s[it] != ',') || (s[it] != '\0')){
             description[jt] = s[it];
@@ -250,6 +249,7 @@ event *event_from_string(char *s)
             return e;
         }
 
+        char *location = (char *)calloc(BUFSIZ, sizeof(char));
         jt = 0;
         while (s[it] != ':') {it++;}
         it++;
@@ -260,6 +260,7 @@ event *event_from_string(char *s)
         e->location = location;
     }
     else {
+        char *location = (char *)calloc(BUFSIZ, sizeof(char));
         e->description = "N/A";
         while (s[it] != '\0'){
             location[jt] = s[it];

@@ -17,7 +17,7 @@
 
 void sigchld_handler(int s);
 request *accept_request(int sock);
-void send_file_to_socket(FILE* file_fd, int sock_fd);
+void send_result_to_client(int sock_fd, int success, request *req);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
