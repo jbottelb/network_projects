@@ -70,6 +70,8 @@ void handler(int new_fd)
             }
         }
     }
+
+    int success;
     
     switch(req->type) {
         case 0:
@@ -77,24 +79,30 @@ void handler(int new_fd)
         case 2:
         {
             cal = process_edit_request(req, cal);
-            int success = save_request(req, cal);
+            success = save_request(req, cal);
             send_result_to_client(new_fd, success, req);
             break;
         }
         case 3:
         {
             event **events = get_events_by_date(cal, req->param);
+            
+            if (!events) {success = 1;}
+            else {success = 0;}
+
+            send_result_to_client_with_data(new_fd, success, req, events);
             free(events);
             break;
         }
         case 4:
         {
             event **events = get_events_by_range(cal, req->param);
+
+            if (!events) {success = 1;}
+            else {success = 0;}
+
+            send_result_to_client_with_data(new_fd, success, req, events);
             free(events);
-            break;
-        }
-        case 5:
-        {
             break;
         }
         default:
@@ -218,17 +226,87 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
-
 void send_result_to_client(int sockfd, int success, request *req)
 {
     int numread;
     char *data = (char *)calloc(BUFSIZ, sizeof(char));
 
     strcat(data, "{\"command\": \"");
-    strcat(data, req->type);
+    if (req->type == 0) {
+        strcat(data, "add");
+    }
+    else if (req->type == 1) {
+        strcat(data, "remove");
+    }
+    else if (req->type == 2) {
+        strcat(data, "update");
+    }
+
     strcat(data, "\", \"calendar\": \"");
     strcat(data, req->calName);
+    strcat(data, "\", \"identifier\": \"");
+
+    if (success == 0) {
+        char *ident = (char *)calloc(BUFSIZ, sizeof(char));
+        sprintf(ident, "%d", req->event->identifier);
+
+        strcat(data, ident);
+        strcat(data, "\", \"success\": \"");
+        strcat(data, "True\", \"error\": \"None\", \"data\": \"None\"}");
+    }
+    else {
+        strcat(data, "XXXX");
+        strcat(data, "\", \"success\": \"");
+        strcat(data, "False\", \"error\": \"Command failed to execute in the calendar\", \"data\": \"None\"}");
+    }
+
+    // Handles edge case where the read is smaller than the buffer size
+    if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
+            printf("server: error sending data packet. \n");
+            exit(1);
+    }
+}
+
+void send_result_to_client_with_data(int sockfd, int success, request *req, event **events)
+{
+    int numread;
+    char *data = (char *)calloc(BUFSIZ, sizeof(char));
+
+    strcat(data, "{\"command\": \"");
+    if (req->type == 3) {
+        strcat(data, "get");
+    }
+    else if (req->type == 4) {
+        strcat(data, "getall");
+    }
+
+    strcat(data, "\", \"calendar\": \"");
+    strcat(data, req->calName);
+    strcat(data, "\", \"identifier\": \"");
+
+    if (success == 0) {
+        strcat(data, "event identifiers in data");
+        strcat(data, "\", \"success\": \"");
+        strcat(data, "True\", \"error\": \"None\", \"data\": [ ");
+        
+        int i = 0;
+        while(events[i]) {
+            if (i != 0) {
+                strcat(data, ", ");
+            }
+            char *e = (char *)calloc(BUFSIZ, sizeof(char));
+            e = string_from_event(events[i]);
+            strcat(data, e);
+            i++;
+        }
+
+        strcat(data, " ]");
+    }
+    else {
+        strcat(data, "XXXX");
+        strcat(data, "\", \"success\": \"");
+        strcat(data, "True\", \"error\": \"None\", \"data\": \"No events in the date range\"}");
+    }
 
     // Handles edge case where the read is smaller than the buffer size
     if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {

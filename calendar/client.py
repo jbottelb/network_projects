@@ -35,7 +35,7 @@ def send_request(req):
         sock.connect(ADDR)
         sock.sendall(json.dumps(req).encode())
         print("Request sent")
-        res = sock.recv(1024)
+        res = sock.recv(4096)
     return res
 
 def build_data():
