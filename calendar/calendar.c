@@ -345,11 +345,12 @@ int remove_event(Calendar *cal, char *i_string)
     return 0;
 }
 
-void update_event(Calendar *cal, char *params){
+void update_event(Calendar *cal, char *params, request *req){
     // identifier:feild:value
     // use that to find and change the requested value
-    char identifier[BUFSIZ] = {0};
-    char feild[BUFSIZ] = {0};
+    char *identifier = (char*)calloc(BUFSIZ, sizeof(char));
+    char *feild = (char*)calloc(BUFSIZ, sizeof(char));
+
     // this is the only one that persists
     char *value = (char*)calloc(BUFSIZ, sizeof(char));
 
@@ -389,6 +390,8 @@ void update_event(Calendar *cal, char *params){
         }
         ptr = ptr->next;
     }
+    free(feild);
+    free(identifier);
 }
 
 // Rememver to free the event array!
@@ -602,7 +605,9 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             remove_event(cal, req->param);
             break;
         case UPDATE:
-            update_event(cal, req->param);
+            printf("BEFORE:: %s\n", req->OG);
+            update_event(cal, req->param, req);
+            printf("AFTER:: %s\n", req->OG);
             break;
         default:
             break;
