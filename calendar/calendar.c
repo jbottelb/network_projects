@@ -605,9 +605,7 @@ Calendar* process_edit_request(request *req, Calendar *cal)
             remove_event(cal, req->param);
             break;
         case UPDATE:
-            printf("BEFORE:: %s\n", req->OG);
             update_event(cal, req->param, req);
-            printf("AFTER:: %s\n", req->OG);
             break;
         default:
             break;
