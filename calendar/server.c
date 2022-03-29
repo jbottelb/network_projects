@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
-    char *port;
+    char *port = (char *)calloc(BUFSIZ, 1);
     int mt = -1;
 
     port = PORT;
@@ -252,8 +252,10 @@ void send_result_to_client(int sockfd, int success, request *req)
     strcat(data, "\", \"identifier\": \"");
 
     if (success == 0) {
-        if (!ident)
+        if (req->type == 0)
             sprintf(ident, "%d", req->event->identifier);
+        else
+            ident = "None";
 
         strcat(data, ident);
         strcat(data, "\", \"success\": \"");
