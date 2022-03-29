@@ -80,7 +80,6 @@ void handler(int new_fd)
         {
             cal = process_edit_request(req, cal);
             success = save_request(req, cal);
-            printf("OG EXISTS HERE ____ %s\n", req->OG);
             send_result_to_client(new_fd, success, req);
             break;
         }
@@ -230,8 +229,10 @@ int main(int argc, char *argv[])
 
 void send_result_to_client(int sockfd, int success, request *req)
 {
+    fflush(stdout);
     int numread;
     char *data = (char *)calloc(BUFSIZ, sizeof(char));
+    char *ident = (char *)calloc(BUFSIZ, sizeof(char));
 
     strcat(data, "{\"command\": \"");
     if (req->type == 0) {
@@ -242,19 +243,22 @@ void send_result_to_client(int sockfd, int success, request *req)
     }
     else if (req->type == 2) {
         strcat(data, "update");
+        ident = "0";
     }
+
 
     strcat(data, "\", \"calendar\": \"");
     strcat(data, req->calName);
     strcat(data, "\", \"identifier\": \"");
 
     if (success == 0) {
-        char *ident = (char *)calloc(BUFSIZ, sizeof(char));
-        sprintf(ident, "%d", req->event->identifier);
+        if (!ident)
+            sprintf(ident, "%d", req->event->identifier);
 
         strcat(data, ident);
         strcat(data, "\", \"success\": \"");
         strcat(data, "True\", \"error\": \"None\", \"data\": \"None\"}");
+        // free(ident);
     }
     else {
         strcat(data, "XXXX");
@@ -262,8 +266,13 @@ void send_result_to_client(int sockfd, int success, request *req)
         strcat(data, "False\", \"error\": \"Command failed to execute in the calendar\", \"data\": \"None\"}");
     }
 
+    int count = 0, it = 0;
+    while (data[it++] != '\0') {
+        count++;
+    }
+
     // Handles edge case where the read is smaller than the buffer size
-    if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
+    if ((numread = send(sockfd, data, count, 0)) == -1) {
             printf("server: error sending data packet. \n");
             exit(1);
     }
@@ -309,9 +318,12 @@ void send_result_to_client_with_data(int sockfd, int success, request *req, even
         strcat(data, "\", \"success\": \"");
         strcat(data, "True\", \"error\": \"None\", \"data\": \"No events in the date range\"}");
     }
-
+    int count = 0, it = 0;
+    while (data[it++] != '\0') {
+        count++;
+    }
     // Handles edge case where the read is smaller than the buffer size
-    if ((numread = send(sockfd, data, sizeof(data), 0)) == -1) {
+    if ((numread = send(sockfd, data, count, 0)) == -1) {
             printf("server: error sending data packet. \n");
             exit(1);
     }

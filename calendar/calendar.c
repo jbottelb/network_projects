@@ -609,9 +609,11 @@ int save_request(request *req, Calendar *cal)
         return 1;
     }
     printf("og string: %s\n", req->OG);
-    fputs(req->OG, fp);
-    fputs("\n", fp);
-    fflush(fp);
+    if (req->OG){
+        fputs(req->OG, fp);
+        fputs("\n", fp);
+        fflush(fp);
+    }
     cal->fp = fp;
     return 0;
 }
