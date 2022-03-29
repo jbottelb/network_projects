@@ -24,14 +24,14 @@
 #define SIZE 1000
 #define BACKLOG 10   // how many pending connections queue will hold
 
-Calendar *calendars[128]; 
+Calendar *calendars[128];
 
 void handler(int new_fd)
 {
     // handles the requests from the client
     // (I am outlining to show how to use the calendar class)
     // (handle the input file like a serialization of requests)
-    
+
     // get request from client
     // build request with string
     // request *req = create_request(revieved string (malloced))
@@ -72,7 +72,7 @@ void handler(int new_fd)
     }
 
     int success;
-    
+
     switch(req->type) {
         case 0:
         case 1:
@@ -80,13 +80,14 @@ void handler(int new_fd)
         {
             cal = process_edit_request(req, cal);
             success = save_request(req, cal);
+            printf("OG EXISTS HERE ____ %s\n", req->OG);
             send_result_to_client(new_fd, success, req);
             break;
         }
         case 3:
         {
             event **events = get_events_by_date(cal, req->param);
-            
+
             if (!events) {success = 1;}
             else {success = 0;}
 
@@ -108,6 +109,7 @@ void handler(int new_fd)
         default:
             printf("invalid request type \n");
     }
+    dump_calendar(cal);
     /*
     // unleash
     close_request(req);
@@ -129,7 +131,7 @@ int main(int argc, char *argv[])
     int mt = -1;
 
     port = PORT;
-    
+
     if (argc == 2)
         mt = 0;
 
@@ -288,7 +290,7 @@ void send_result_to_client_with_data(int sockfd, int success, request *req, even
         strcat(data, "event identifiers in data");
         strcat(data, "\", \"success\": \"");
         strcat(data, "True\", \"error\": \"None\", \"data\": [ ");
-        
+
         int i = 0;
         while(events[i]) {
             if (i != 0) {

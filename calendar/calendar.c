@@ -19,12 +19,10 @@ request *request_from_string(char *s)
 {
     request *req = (request*) calloc(1, sizeof(request));
     req->OG = s;
-
     int l = strlen(s);
-    char buf[BUFSIZ] = {0}; // you would not believe how important the {0} is
+    char buf[BUFSIZ] = {0};
     int i = 0, j=0;
     int inString = 0;
-
     // reduce to simplier format (no brackets or spacing)
     while (s[i] != '\0'){
         if (s[i] == '"'){
@@ -48,10 +46,8 @@ request *request_from_string(char *s)
         jt++; it++;
     }
     req->calName = calName;
-
     // get request type
     char *reqType = (char *)calloc(BUFSIZ, sizeof(char));
-
     while (buf[it] != ':') {it++;}
     it++;
     jt = 0;
@@ -60,7 +56,6 @@ request *request_from_string(char *s)
         jt++; it++;
     }
     req->type = get_request_type(reqType);
-
     if (req->type == -1){
         printf("\nFailed to identify request type\n");
     }
@@ -74,7 +69,6 @@ request *request_from_string(char *s)
         arg_string[jt] = buf[it];
         it++; jt++;
     }
-
     if (req->type == ADD){
         printf("Request being built as an ADD\n");
         req->event = event_from_string(arg_string);
@@ -106,17 +100,17 @@ request *request_from_string(char *s)
 
 RequestType get_request_type(char* reqType){
     RequestType tr;
-    if      ((strcmp(reqType, "ADD")    == 0) || (strcmp(reqType, "add")    == 0)){
+    if      (strcmp(reqType, "ADD")    == 0) {
         tr = ADD;
-    } else if ((strcmp(reqType, "REMOVE") == 0) || (strcmp(reqType, "remove") == 0)) {
+    } else if (strcmp(reqType, "REMOVE") == 0) {
         tr = REMOVE;
-    } else if ((strcmp(reqType, "UPDATE") == 0) || (strcmp(reqType, "update") == 0)) {
+    } else if (strcmp(reqType, "UPDATE") == 0) {
         tr = UPDATE;
-    } else if ((strcmp(reqType, "GET"   ) == 0) || (strcmp(reqType, "get"   ) == 0)) {
+    } else if (strcmp(reqType, "GET"   ) == 0) {
         tr = GET;
-    } else if ((strcmp(reqType, "GETALL") == 0) || (strcmp(reqType, "getall") == 0)) {
+    } else if (strcmp(reqType, "GETALL") == 0) {
         tr = GETALL;
-    } else if ((strcmp(reqType, "INPUTS") == 0) || (strcmp(reqType, "inputs") == 0)){
+    } else if (strcmp(reqType, "INPUTS") == 0) {
         tr = INPUTS;
     } else {
         printf("Invalid type, got: %s\n", reqType);
@@ -177,9 +171,6 @@ char *get_tripple_arg(char *str){
 event *event_from_string(char *s)
 {
     event *e = (event *) calloc (1, sizeof(event));
-
-    printf("string: %s\n", s);
-
     char *date = (char *)calloc(BUFSIZ, sizeof(char));
     int it = 0, jt = 0;
     while (s[it] != ':') {it++;}
@@ -211,66 +202,33 @@ event *event_from_string(char *s)
     jt = 0;
     while (s[it] != ':') {it++;}
     it++;
-    while ((s[it] != ',') || (s[it] != '\0')){ // not sure why but it segfaults here when there are no more additional arguments
+    while (s[it] != ','){
         name[jt] = s[it];
         jt++; it++;
     }
     e->name = name;
-
-    if (s[it] == '\0') {
-        e->description = "N/A";
-        e->location = "N/A";
-        return e;
-    }
-
-    char *check = (char *)calloc(BUFSIZ, sizeof(char));
-
-    it++;
+    /*
+    char *description = (char *)calloc(BUFSIZ, sizeof(char));
     jt = 0;
-    while (s[it] != ':') {
-        check[jt] = s[it];
-        jt++, it++;
-    }
+    while (s[it] != ':') {it++;}
     it++;
-
-    printf("check: %s\n", check);
-
-    if (strcmp(check, "description") == 0) {
-        char *description = (char *)calloc(BUFSIZ, sizeof(char));
-        jt = 0;
-        while ((s[it] != ',') || (s[it] != '\0')){
-            description[jt] = s[it];
-            jt++; it++;
-        }
-        e->description = description;
-
-        if (s[it] == '\0') {
-            e->location = "N/A";
-            return e;
-        }
-
-        char *location = (char *)calloc(BUFSIZ, sizeof(char));
-        jt = 0;
-        while (s[it] != ':') {it++;}
-        it++;
-        while (s[it] != '\0'){
-            location[jt] = s[it];
-            jt++; it++;
-        }
-        e->location = location;
+    while (s[it] != ','){
+        description[jt] = s[it];
+        jt++; it++;
     }
-    else {
-        char *location = (char *)calloc(BUFSIZ, sizeof(char));
-        e->description = "N/A";
-        while (s[it] != '\0'){
-            location[jt] = s[it];
-            jt++; it++;
-        }
-        e->location = location;
+    e->description = description;
+    char *location = (char *)calloc(BUFSIZ, sizeof(char));
+    jt = 0;
+    while (s[it] != ':') {it++;}
+    it++;
+    while (s[it] != '\0'){
+        location[jt] = s[it];
+        jt++; it++;
     }
-
-    printf("%s\n %s\n %s\n %s\n %s\n %s\n", e->date, e->time, e->duration, e->name, e->description, e->location);
-
+    e->location = location;
+    */
+    e->description = "not yet";
+    e->location = "coming soon";
     return e;
 }
 
@@ -296,7 +254,6 @@ char *string_from_event(event *e){
     strcat(str, "\" }");
     return str;
 }
-
 
 /*
     Functions that do the things
@@ -347,7 +304,6 @@ int remove_event(Calendar *cal, char *i_string)
     if (ptr->prev){
         printf("Head note has a prev. That is bad\n");
     }
-
     while (ptr->identifier!=identifier){
         if (!ptr->next)
         {
@@ -357,7 +313,6 @@ int remove_event(Calendar *cal, char *i_string)
         ptr = ptr->next;
     }
     printf("%s\n", ptr->name);
-
     if (ptr == cal->head){
         cal->head = ptr->next;
         if (ptr->next)
@@ -382,10 +337,8 @@ void update_event(Calendar *cal, char *params){
     // use that to find and change the requested value
     char *identifier = (char*)calloc(BUFSIZ, sizeof(char));
     char *feild = (char*)calloc(BUFSIZ, sizeof(char));
-
     // this is the only one that persists
     char *value = (char*)calloc(BUFSIZ, sizeof(char));
-
     int it = 0, jt = 0;
     while (params[it] != ':'){
         identifier[jt++] = params[it++];
@@ -398,7 +351,6 @@ void update_event(Calendar *cal, char *params){
     }
     printf("%s %s %s\n", identifier, feild, value);
     int id = atoi(identifier);
-
     // find event
     event *ptr = cal->head;
     while (ptr){
@@ -474,7 +426,6 @@ event** get_events_by_range(Calendar *cal, char* params)
     while (params[it] != ':'){
         start_date[jt++] = params[it++];
     } it++; jt = 0;
-
     while (params[it] != '\0'){
         end_date[jt++] = params[it++];
     }
@@ -562,25 +513,20 @@ int delete_calendar(Calendar *cal)
 }
 
 /*
-
 The following code is for dealing with the data on disk (in /data)
-
 Each calendar is in its own file, and is loaded into a linked list of events
 called a calendar. It is a linked list because that is the easist DS for me
 to impliment in C. There is no other reason.
-
 */
 Calendar *load_calendar(char *file_path, char *name)
 {
     FILE *fp = fopen(file_path, "ra");
-
     Calendar *cal = (Calendar *)calloc(1, sizeof(Calendar));
     cal->file_path = file_path;
     cal->name = name;
     cal->count = 0;
     cal->head = NULL;
     cal->identifier_counter = 0;
-
     if (!fp){
         printf("Creating file for calendar\n");
         printf("Calendar path: %s\n", cal->file_path);
@@ -591,20 +537,17 @@ Calendar *load_calendar(char *file_path, char *name)
         }
         return cal;
     }
-
     char *string = NULL;
     size_t read;
     size_t len = 0;
     while ((read = getline(&string, &len, fp)) != -1)
     {
         printf("Adding request from file %s to calendar %s:\n", file_path, name);
-
         request *req = request_from_string(string);
         process_edit_request(req, cal);
         close_request(req);
     }
     printf("Done reading from file");
-
     return cal;
 }
 
@@ -621,7 +564,6 @@ void dump_calendar(Calendar *cal){
     }
     return;
 }
-
 /*
     Takes a raw string request and adds it to a calendar
     (used primarily for load operation)
@@ -642,7 +584,6 @@ Calendar* process_edit_request(request *req, Calendar *cal)
         default:
             break;
     }
-
     return cal;
 }
 
@@ -671,7 +612,6 @@ int save_request(request *req, Calendar *cal)
     fputs(req->OG, fp);
     fputs("\n", fp);
     fflush(fp);
-    close_request(req);
     cal->fp = fp;
     return 0;
 }
