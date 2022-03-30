@@ -2,6 +2,7 @@
 Written By Josh Bottelberghe and Joseph Sweilem \
 Total time: 50 hours
 
+We were granted a TWO DAY extension on the project
 
 ## Overview
 To show the code works for all the commands, run
@@ -34,7 +35,7 @@ The client runs as requested.
 
 ## Server
 The server functionality is best explored by the file test.c, this gives
-a good understanding of what to expect from the calendar library. 
+a good understanding of what to expect from the calendar library.
 
 ### Examples
 
