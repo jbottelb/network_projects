@@ -16,6 +16,11 @@ def main():
         print("WRONG", len(sys.argv))
         exit(1)
 
+    connections = open("../.mycal")
+    c_data = json.load(connections)
+
+    ADDR = (c_data["servername"], int(c_data["port"]))
+
     if sys.argv[2] == "input":
         inputs = open(sys.argv[3])
         data = json.load(inputs)
