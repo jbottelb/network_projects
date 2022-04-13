@@ -109,11 +109,6 @@ void handler(int new_fd)
             printf("invalid request type \n");
     }
     dump_calendar(cal);
-    /*
-    // unleash
-    close_request(req);
-    free(cal);
-    */
 }
 
 int main(int argc, char *argv[])
@@ -129,7 +124,27 @@ int main(int argc, char *argv[])
     char *port = (char *)calloc(BUFSIZ, 1);
     int mt = -1;
 
-    port = PORT;
+    FILE *fp = fopen("../.mycal", "r");
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    while ((read = getline(&line, &len, fp)) != -1) {}
+
+    int i = 0;
+    while (line[i] != ':') {i++;}
+    i++;
+    while (line[i] != ':') {i++;}
+    while (line[i] != '"') {i++;}
+    i++;
+
+    int j = 0;
+    while(line[i] != '"') {
+        port[j] = line[i];
+        i++, j++;
+    }
+
+    fclose(fp);
 
     if (argc == 2)
         mt = 0;

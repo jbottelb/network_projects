@@ -31,11 +31,12 @@ date. Therefore, we wrote the server to parse the requests on its own. This limi
 flexibilty.
 
 ## Client
-The client runs as requested.
+The client runs as requested. We did it in Python so there is no Makefile necessary for the executable.
 
 ## Server
 The server functionality is best explored by the file test.c, this gives
-a good understanding of what to expect from the calendar library.
+a good understanding of what to expect from the calendar library. 
+The makefile to compile the server pieces is in the server directory.
 
 ### Examples
 
