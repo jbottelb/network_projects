@@ -17,19 +17,41 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#define MAXLETTERS 10
+#define MAXGUESSES 10
+
 typedef enum {
-    EMPTY, NOT_IN, IN, CORRECT
+    EMPTY, WRONG, IN, CORRECT
 } LetterType;
 
-typedef struct Board Board;
-struct Board {
+typedef enum {
+    CREATED, STARTED, WON, LOST
+} GameState;
+
+typedef struct Wordle Wordle;
+struct Wordle {
     char        *name;
-    char        Letters[6][5];
-    LetterType  Guesses[6][5];
+    char        Letters[MAXGUESSES][MAXLETTERS];
+    LetterType  Guesses[MAXGUESSES][MAXLETTERS];
+    int         count;
+    char       *word;
+    int         wordlen;
+    int         max_guesses;
+    GameState   state;
 };
 
-Board *create_board (char *name);
+Wordle *create_board (char *name, char *word, int guesses);
 
-Board *make_guess (char *guess);
+/*
+    Updates board appropriately and returns the result of the guess
+    Game state will be updated to WON if the guess was correct
+*/
+char *make_guess (char *guess, Wordle *board);
+
+void print_board(Wordle *b);
+
+
+// helpers
+int in_word(char *word, char c);
 
 #endif
