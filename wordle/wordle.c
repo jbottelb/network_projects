@@ -176,3 +176,16 @@ void print_board(Wordle *b){
         printf("\n");
     }
 }
+
+char *censor(char *str){
+    char string[50];
+    FILE *in_file = fopen("server/bad_words.txt", "r");
+    while ( fscanf(in_file,"%s", string) == 1){
+        if(strstr(str, string) != 0) {
+            fclose(in_file);
+            return "Bleep";
+        }
+    }
+    fclose(in_file);
+    return str;
+}

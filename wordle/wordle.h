@@ -54,7 +54,7 @@ int score_guess(char *res, int round);
 
 
 void print_board(Wordle *b);
-
+char *censor(char *str);
 
 // helpers
 int in_word(char *word, char c);

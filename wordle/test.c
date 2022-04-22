@@ -84,7 +84,7 @@ int main() {
     me->winner = "no";
 
     me->score = 0;
-    while (strstr("yes", me->winner) == 0){
+    while (strstr("yes", me->winner) == 0 && 1 == 0){
         printf("Guess\n");
         char my_guess[5];
         scanf("%s", my_guess);
@@ -120,6 +120,8 @@ int main() {
     char *sc = (char *)calloc(128, sizeof(char));
     sc = "YGBBB";
     printf("Score: %d\n", score_guess(sc, 2));
+
+    printf("Censored word: %s\n", censor("applefuck"));
 
     return 0;
 }
