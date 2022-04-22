@@ -16,6 +16,7 @@
 #include "server.h"
 #include "player.h"
 #include "wordle.h"
+#include "cJSON.h"
 
 #define PORT "41069"
 #define GAMEPORT "41420"
@@ -162,9 +163,25 @@ int main(int argc, char *argv[])
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        Player *player = (Player *)calloc(1, sizeof(Player));
+        // Receive join or joininstance request
+        char *message = accept_request(new_fd);
 
-        char *message = (char *)calloc(BUFSIZ, sizeof(char));
+        printf("%s\n", message);
+        
+        cJSON *join_request = cJSON_Parse(message);
+
+        if (join_request == NULL) {
+            const char *error_ptr = cJSON_GetErrorPtr();
+            if (error_ptr != NULL)
+            {
+                fprintf(stderr, "Error before: %s\n", error_ptr);
+            }
+            exit(1);
+        }
+
+        printf("%s\n", cJSON_Print(join_request));
+        
+        /*
         message = "yes";
         int numread;
         int count = 0, it = 0;
@@ -178,6 +195,7 @@ int main(int argc, char *argv[])
                 printf("%s\n", strerror(errno));
                 exit(1);
         }
+        */
 
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
@@ -208,11 +226,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/*
+char *accept_request(int sock)
+{
     int file_size, numbytes;
     char buf[SIZE];
 
-    // Receives file name from client
+    // Receives request from client
     if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
         printf("server: request was not received. \n");
         exit(1);
@@ -220,8 +239,12 @@ int main(int argc, char *argv[])
 
     // Add null terminator
     buf[numbytes] = '\0';
-    printf("server: received request\n%s\n", buf);
-*/
+
+    char* buff_pointer = (char *)calloc(1, sizeof(char));
+    strcpy(buff_pointer, buf);
+
+    return buff_pointer;
+}
 
 void *get_in_addr(struct sockaddr *sa)
 {

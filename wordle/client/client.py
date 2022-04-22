@@ -33,11 +33,6 @@ def send_request(req):
 
             #if join["data"]["result"] == "no":
             #    exit(0)
-            
-            sock.sendall(json.dumps(req).encode())
-
-            result = sock.recv(4096)
-            print(result)
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["data"]["server"], int(req["data"]["port"])))
             sock.sendall(json.dumps(req).encode())
@@ -50,6 +45,7 @@ def send_request(req):
             #if join["data"]["result"] == "no":
             #    exit(0)
 
+            '''
             result = sock.recv(4096)
             print(result)
 
@@ -57,10 +53,9 @@ def send_request(req):
                 print("made it here")
                 #result = sock.recv(4096)
                 #print(result)
-                '''
-                Build request listen types and responses
-                '''
+                #Build request listen types and responses
                 exit(0)
+            '''
         else:
             print("Something went wrong if we got here")
             exit(1)

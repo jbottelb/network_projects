@@ -20,6 +20,7 @@
 #define PLAYERS 1
 
 void sigchld_handler(int s);
+char *accept_request(int sock);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
