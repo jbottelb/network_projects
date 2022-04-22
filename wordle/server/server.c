@@ -135,6 +135,8 @@ int main(int argc, char *argv[])
 
         Player *player = (Player *)calloc(1, sizeof(Player));
 
+        message_player(strcat("join port: ", GAMEPORT), *player);
+
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */

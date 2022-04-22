@@ -12,56 +12,79 @@ ADDR = ("localhost", 41069)
 def main():
     # TODO: validate length
     l = len(sys.argv)
-    if l < 3:
+    if l != 8:
         print("WRONG", len(sys.argv))
         exit(1)
 
-    if sys.argv[2] == "input":
-        inputs = open(sys.argv[3])
-        data = json.load(inputs)
-        
-        for command in data:
-            response = send_request(command)
-            print(response)
     else:
-        data = build_data()
-        print(data)
-
-        response = send_request(data)
-        print(response)
+        data = build_data_join()
+        send_request(data)
 
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect(ADDR)
-        sock.sendall(json.dumps(req).encode())
-        print("Request sent")
-        res = sock.recv(4096)
-    return res
+        if req["MessageType"] == "Join":
+            sock.connect((req["data"]["server"], int(req["data"]["port"])))
+            sock.sendall(json.dumps(req).encode())
+            
+            print("Request sent")
+            
+            join = sock.recv(4096)
+            print(join)
 
-def build_data():
+            #if join["data"]["result"] == "no":
+            #    exit(0)
+            
+            result = sock.recv(4096)
+            print(result)
+        elif req["MessageType"] == "JoinInstance":
+            sock.connect((req["data"]["server"], int(req["data"]["port"])))
+            sock.sendall(json.dumps(req).encode())
+            
+            print("Request sent")
+            
+            join = sock.recv(4096)
+            print(join)
+
+            #if join["data"]["result"] == "no":
+            #    exit(0)
+
+            result = sock.recv(4096)
+            print(result)
+
+            while result["MessageType"] != "EndGame":
+                print("made it here")
+                #result = sock.recv(4096)
+                #print(result)
+                '''
+                Build request listen types and responses
+                '''
+                exit(0)
+        else:
+            print("Something went wrong if we got here")
+            exit(1)
+
+
+
+
+def build_data_join():
     request = {}
-    request["CALENDAR"] = sys.argv[1]
-    request["ACTION"]   = (sys.argv[2]).upper()
     args = {}
 
-    if sys.argv[2] == "add":
-        for i in range(3, len(sys.argv)-1, 2):
-            args[sys.argv[i]] = sys.argv[i+1]
-    elif sys.argv[2] == "remove":
-        args["identifier"] = sys.argv[3]
-    elif sys.argv[2] == "update":
-        args["identifier"] = sys.argv[3]
-        args[sys.argv[4]] = sys.argv[5]
-    elif sys.argv[2] == "get":
-        args["date"] = sys.argv[3]
-    elif sys.argv[2] == "getall":
-        args["start_date"] = sys.argv[3]
-        args["end_date"] = sys.argv[4]
+    request["MessageType"] = sys.argv[1]
+
+    args["name"] = sys.argv[3]
+    args["server"] = sys.argv[5]
+
+    if sys.argv[1] == "Join":
+        args["port"] = sys.argv[7]
+    elif sys.argv[1] == "JoinInstance":
+        args["nonce"] = sys.argv[7]
     else:
         print("Invalid Command: Try Again")
         exit(1)
 
-    request["ARGUMENTS"] = args
+    request["data"]   = args
+
     return request
 
 if __name__ == "__main__":
