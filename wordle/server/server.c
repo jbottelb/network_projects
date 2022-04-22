@@ -168,30 +168,17 @@ int main(int argc, char *argv[])
 
         printf("%s\n", message);
 
-        //char* Json = "{\"MessageType\": \"Join\", \"data\": {\"name\": \"joe\", \"server\": \"localhost\", \"port\": \"41069\"}}";
-
         cJSON *join_result = cJSON_Parse(message);
-        printf("%s\n", cJSON_Print(join_result));
 
         cJSON *data = cJSON_GetObjectItemCaseSensitive(data, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
-        Player *p = create_player(name->valuestring, new_fd, 0, 0);
+        Player *p = create_player(name->valuestring, new_fd, player_count, 0);
 
-        /*
-        message = "yes";
-        int numread;
-        int count = 0, it = 0;
+        players[player_count] = *p; 
+        player_count++; 
 
-        while (message[it++] != '\0') {
-            count++;
-        }
-
-        if ((numread = send(new_fd, message, count, 0)) == -1) {
-                printf("server: error sending data packet. \n");
-                printf("%s\n", strerror(errno));
-                exit(1);
-        }
-        */
+        char* response = "yes";
+        send_JoinResult(response, p);
 
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);

@@ -23,18 +23,22 @@ def main():
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         if req["MessageType"] == "Join":
-            sock.connect((req["data"]["server"], int(req["data"]["port"])))
+            sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
             
             print("Request sent")
             
-            join = sock.recv(4096)
+            rec = sock.recv(4096)
+            join = json.loads(rec.decode())
+
             print(join)
 
-            #if join["data"]["result"] == "no":
-            #    exit(0)
+            if join["Data"]["Result"] == "No":
+                exit(0)
+            else:
+                print("ok ok ok")
         elif req["MessageType"] == "JoinInstance":
-            sock.connect((req["data"]["server"], int(req["data"]["port"])))
+            sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
             
             print("Request sent")
@@ -69,18 +73,18 @@ def build_data_join():
 
     request["MessageType"] = sys.argv[1]
 
-    args["name"] = sys.argv[3]
-    args["server"] = sys.argv[5]
+    args["Name"] = sys.argv[3]
+    args["Server"] = sys.argv[5]
 
     if sys.argv[1] == "Join":
-        args["port"] = sys.argv[7]
+        args["Port"] = sys.argv[7]
     elif sys.argv[1] == "JoinInstance":
-        args["nonce"] = sys.argv[7]
+        args["Nonce"] = sys.argv[7]
     else:
         print("Invalid Command: Try Again")
         exit(1)
 
-    request["data"]   = args
+    request["Data"]   = args
 
     return request
 
