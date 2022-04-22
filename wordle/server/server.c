@@ -168,18 +168,10 @@ int main(int argc, char *argv[])
 
         printf("%s\n", message);
         
-        cJSON *join_request = cJSON_Parse(message);
-
-        if (join_request == NULL) {
-            const char *error_ptr = cJSON_GetErrorPtr();
-            if (error_ptr != NULL)
-            {
-                fprintf(stderr, "Error before: %s\n", error_ptr);
-            }
-            exit(1);
-        }
-
-        printf("%s\n", cJSON_Print(join_request));
+        //char* Json = "{\"MessageType\": \"Join\", \"data\": {\"name\": \"joe\", \"server\": \"localhost\", \"port\": \"41069\"}}";
+    
+        cJSON *join_result = cJSON_Parse(message);
+        //printf("%s\n", cJSON_Print(join_result));
         
         /*
         message = "yes";
