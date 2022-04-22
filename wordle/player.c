@@ -17,8 +17,17 @@
 #include "cJSON.h"
 #include "server/server.h"
 
-Player *create_player(char *name, int socker, int num){
-    return NULL;
+Player *create_player(char *name, int socket, int num, int nonce){
+    Player *new = (Player *)calloc(1, sizeof(Player));
+    new->name = name;
+    new->socket = socket;
+    new->num = num;
+    new->nonce = nonce;
+    new->winner = "no";
+    new->state = WAITING;
+    new->correct = "no";
+
+    return new;
 }
 
 
