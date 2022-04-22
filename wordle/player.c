@@ -18,8 +18,17 @@
 /*
 
 */
-int message_player(char *message, Player p)
+void message_player(char *message, Player p)
 {
-    
-    return 0;
+    int numread;
+    int count = 0, it = 0;
+
+    while (message[it++] != '\0') {
+        count++;
+    }
+
+    if ((numread = send(p.socket, message, count, 0)) == -1) {
+            printf("server: error sending data packet. \n");
+            exit(1);
+    }
 }
