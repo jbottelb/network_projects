@@ -274,3 +274,17 @@ char *recv_Chat(cJSON *message){
     sprintf(mes, "%s: %s\n", j_name->valuestring, j_text->valuestring);
     return mes;
 }
+
+Player *recv_JoinInstance(cJSON *message, int sock, int num){
+    cJSON *data = cJSON_GetObjectItemCaseSensitive(message, "Data");
+    cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+    cJSON *nonce = cJSON_GetObjectItemCaseSensitive(data, "Nonce");
+    Player *new = create_player(name->valuestring, sock, num, nonce->valueint);
+    return new;
+}
+
+char *recv_Guess(cJSON *message, Player *p){
+    cJSON *data = cJSON_GetObjectItemCaseSensitive(message, "Data");
+    cJSON *guess = cJSON_GetObjectItemCaseSensitive(data, "Guess");
+    return guess->valuestring;
+}

@@ -55,6 +55,8 @@ void send_EndGame(Player *p, char *winner, Player **players);
 // each one will take the full JSON obj
 Player *recv_Join(cJSON *message, int sock, int num, int nonce);
 char   *recv_Chat(cJSON *message);  // returns string PlayerName: text
+Player *recv_JoinInstance(cJSON *message, int sock, int num);
+char   *recv_Guess(cJSON *message, Player *p);
 
 cJSON *add_player_array(cJSON *json, Player **ps);
 cJSON *add_player_array_gr(cJSON *json, Player **ps);
