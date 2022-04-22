@@ -14,3 +14,12 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "player.h"
+
+/*
+
+*/
+int message_player(char *message, Player p)
+{
+    
+    return 0;
+}

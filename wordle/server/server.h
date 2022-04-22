@@ -22,3 +22,4 @@ void send_result_to_client_with_data(int sock_fd, int success, request *req, eve
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
+void start_game(char *port);

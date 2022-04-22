@@ -1,7 +1,3 @@
-/*
-** server.c -- a stream socket server demo
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -18,11 +14,37 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "server.h"
-#include "calendar.h"
+#include "player.h"
+#include "wordle.h"
 
-#define PORT "41069"  // the port users will be connecting to
+#define PORT "41069"
+#define GAMEPORT "41420"
 #define SIZE 1000
-#define BACKLOG 10   // how many pending connections queue will hold
+#define BACKLOG 10
+#define MAXPLAYERS 100
+#define PLAYERS 1
+
+void start_game(char *port){
+    // start up socket
+
+    // create game instance select word, create "Board"
+
+    // while loop to listen for everyone to join, with select for messaging
+
+    // once everyones here, start playing
+
+    /*
+    Game Loop
+    for loop for all guesses,
+        tell everyone we started the round, then another while loop with select
+        on players giving guess, handle that with another function
+        break if someone wins
+    */
+
+    // calculate restuls, report results
+
+    return;
+}
 
 int main(int argc, char *argv[])
 {
@@ -40,7 +62,7 @@ int main(int argc, char *argv[])
     port = PORT;
 
     if (argc == 2)
-        mt = 0;
+        { mt = 0; }
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -96,6 +118,8 @@ int main(int argc, char *argv[])
     }
 
     printf("server: waiting for connections...\n");
+    Player players[MAXPLAYERS];
+    int player_count = 0;
 
     while(1) {  // main accept() loop
         sin_size = sizeof their_addr;
@@ -110,22 +134,21 @@ int main(int argc, char *argv[])
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
-        if (mt != -1) {
+        if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
-
-	        /* Fork off child process to handle request */
+            /* Fork off child process to handle request */
             pid_t pid = fork();
 
             if(pid < 0){
                 continue;
             }
             else if(pid == 0) {
-                handler(new_fd);
+                start_game(GAMEPORT);
+                /*
+                    Message all players to join game lobby, then drop them
+                */
                 exit(0);
             }
-        }
-        else {
-            handler(new_fd);
         }
 
         // Closes socket and returns to listening for new connections

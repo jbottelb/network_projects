@@ -28,7 +28,7 @@ struct Player {
     PlayerState state;
 };
 
-int message_player(char *message);
+int message_player(char *message, Player p);
 
 
 #endif
