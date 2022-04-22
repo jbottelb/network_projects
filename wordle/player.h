@@ -29,6 +29,10 @@ struct Player {
     int nonce;
     int num;
     char *name;
+    char *res;
+    char *rec_time;
+    char *correct;      // yes or no
+    char *winner;       // yes or no
     PlayerState state;
 };
 
@@ -41,10 +45,12 @@ void send_StartGame(int rounds, Player *players, Player p);
 void send_StartRound(int wordlen, int Round, int remain, Player *players, Player p);
 void send_PromptForGuess(int wordlen, Player p, int guessnum);
 void send_GuestResponse(Player p, char *guess, char *ac);
-void send_GuessResult(Player p, char *cor, char *time, char *res, char *win);
-void send_EndRound(Player p, char *win);
+void send_GuessResult(Player p, Player *ps, char *win);
+void send_EndRound(Player p, Player *ps, char *win);
 void send_EndGame(Player p, char *winner, Player *players);
 
 cJSON *add_player_array(cJSON *json, Player *ps);
+cJSON *add_player_array_gr(cJSON *json, Player *ps);
+cJSON *add_player_array_er(cJSON *json, Player *ps);
 
 #endif
