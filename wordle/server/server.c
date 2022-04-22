@@ -22,7 +22,6 @@
 #define SIZE 1000
 #define BACKLOG 10
 #define MAXPLAYERS 100
-#define PLAYERS 1
 
 void start_game(char *port){
     // start up socket
@@ -135,7 +134,20 @@ int main(int argc, char *argv[])
 
         Player *player = (Player *)calloc(1, sizeof(Player));
 
-        message_player(strcat("join port: ", GAMEPORT), *player);
+        char message[SIZE] = "join up hoe";
+        int numread;
+        int count = 0, it = 0;
+
+        while (message[it++] != '\0') {
+            count++;
+        }
+
+        printf("%d\n", count);
+
+        if ((numread = send(sockfd, message, count, 0)) == -1) {
+                printf("server: error sending data packet. \n");
+                exit(1);
+        }
 
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);

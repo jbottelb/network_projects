@@ -14,6 +14,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#define PLAYERS 1
+
 void sigchld_handler(int s);
 
 // get sockaddr, IPv4 or IPv6:
