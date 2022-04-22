@@ -1,0 +1,9 @@
+{
+    "MessageType": "Join",
+     "data":
+     {
+         "name": "Somestring",
+         "server": "localhost",
+         "port": "41069"
+     }
+}

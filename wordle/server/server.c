@@ -167,12 +167,12 @@ int main(int argc, char *argv[])
         char *message = accept_request(new_fd);
 
         printf("%s\n", message);
-        
+
         //char* Json = "{\"MessageType\": \"Join\", \"data\": {\"name\": \"joe\", \"server\": \"localhost\", \"port\": \"41069\"}}";
-    
+
         cJSON *join_result = cJSON_Parse(message);
-        //printf("%s\n", cJSON_Print(join_result));
-        
+        printf("%s\n", cJSON_Print(join_result));
+
         /*
         message = "yes";
         int numread;
@@ -232,7 +232,7 @@ char *accept_request(int sock)
     // Add null terminator
     buf[numbytes] = '\0';
 
-    char* buff_pointer = (char *)calloc(1, sizeof(char));
+    char* buff_pointer = (char *)calloc(SIZE, sizeof(char));
     strcpy(buff_pointer, buf);
 
     return buff_pointer;
