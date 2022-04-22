@@ -170,12 +170,12 @@ int main(int argc, char *argv[])
 
         cJSON *join_result = cJSON_Parse(message);
 
-        cJSON *data = cJSON_GetObjectItemCaseSensitive(data, "Data");
+        cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+        
         Player *p = create_player(name->valuestring, new_fd, player_count, 0);
-
-        players[player_count] = *p; 
-        player_count++; 
+        players[player_count] = *p;
+        player_count++;
 
         char* response = "yes";
         send_JoinResult(response, p);
