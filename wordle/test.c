@@ -24,6 +24,14 @@ int main() {
 
     printf("This should be B : %s\n", cJSON_GetObjectItemCaseSensitive(json, "2")->valuestring);
 
+    cJSON *structure = cJSON_CreateObject();
+    cJSON_AddStringToObject(structure, "MT", "An MT");
+
+    cJSON *data = cJSON_CreateObject();
+    cJSON_AddStringToObject(data, "data", "items in data");
+    cJSON_AddItemToObject(structure, "data", data);
+
+    printf("%s\n", cJSON_Print(structure));
     cJSON_Delete(json);
 
     return 0;

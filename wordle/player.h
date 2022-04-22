@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include "cJSON.h"
 
 typedef enum {
     GUESSED, GUESSING, WAITING
@@ -25,10 +26,25 @@ typedef struct Player Player;
 struct Player {
     int socket;
     int score;
+    int nonce;
+    int num;
+    char *name;
     PlayerState state;
 };
 
 void message_player(char *message, Player p);
+void send_JoinResult(char *res, Player p);
+void send_Chat(char *text, char *sender, Player p);
+void send_StartInstance(Player p, char *server, char *port);
+void send_JoinInstanceResult(char *res, Player p);
+void send_StartGame(int rounds, Player *players, Player p);
+void send_StartRound(int wordlen, int Round, int remain, Player *players, Player p);
+void send_PromptForGuess(int wordlen, Player p, int guessnum);
+void send_GuestResponse(Player p, char *guess, char *ac);
+void send_GuessResult(Player p, char *cor, char *time, char *res, char *win);
+void send_EndRound(Player p, char *win);
+void send_EndGame(Player p, char *winner, Player *players);
 
+cJSON *add_player_array(cJSON *json, Player *ps);
 
 #endif
