@@ -14,4 +14,4 @@ test: test.o wordle.o cJSON.o player.o
 all: server test
 
 clean:
-	rm *.o server/server server/server.o test 
+	rm *.o server/server server/server.o test

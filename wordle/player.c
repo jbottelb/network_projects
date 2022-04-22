@@ -138,7 +138,7 @@ void send_PromptForGuess(int wordlen, Player *p, int guessnum){
     cJSON_Delete(package);
 }
 
-void send_GuestResponse(Player *p, char *guess, char *ac){
+void send_GuessResponse(Player *p, char *guess, char *ac){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "GuestResponse");
 

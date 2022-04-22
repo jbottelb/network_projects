@@ -47,6 +47,9 @@ Wordle *create_board (char *name, char *word, int guesses);
     Game state will be updated to WON if the guess was correct
 */
 char *make_guess (char *guess, Wordle *board);
+int is_correct (char *res);
+int in_word_list(char *word);
+char *select_word(Wordle *w);
 
 void print_board(Wordle *b);
 

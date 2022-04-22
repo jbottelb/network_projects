@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <time.h>
 #include "wordle.h"
 
 Wordle *create_board (char *name, char *word, int guesses){
@@ -66,6 +67,64 @@ char *make_guess (char *guess, Wordle *board){
     }
     board->state = STARTED;
     return res;
+}
+
+char *select_word(Wordle *w){
+    int num = 2314; // number of words in file
+    char *word = (char *) calloc(1, sizeof(char));
+    time_t t;
+    int index;
+    srand((unsigned) time(&t));
+    index = rand() % num;
+    // now we move forward that many spaces, then select that word
+    char string[BUFSIZ];
+    FILE *file = fopen("server/word_list.txt", "r");
+    while ( fscanf(file, "%s", string) == 1){
+        int i = 0;
+        while (string[i] != '\0'){
+            if (index == 0){
+                int k = 0;
+                while (k != ' ' && k != '\0'){
+                    word[k] = string[i + k];
+                    k++;
+                }
+                w->wordlen = k;
+                w->word = word;
+                fclose(file);
+                return word;
+            }
+            if (string[i] == ' '){
+                index--;
+            }
+            i++;
+        }
+    }
+    fclose(file);
+    return word;
+}
+
+int in_word_list(char *word){
+    char string[50];
+    FILE *in_file = fopen("server/word_list.txt", "r");
+    while ( fscanf(in_file,"%s", string) == 1){
+        if(strstr(string, word) != 0) {
+            fclose(in_file);
+            return 0;
+        }
+    }
+    fclose(in_file);
+    return 1;
+}
+
+
+int is_correct (char *res){
+    int i = 0;
+    while (res[i] != '\0'){
+        if (res[i++] != 'G'){
+            return 1;
+        }
+    }
+    return 0;
 }
 
 int in_word(char *word, char c){

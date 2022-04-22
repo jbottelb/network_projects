@@ -44,6 +44,35 @@ void start_game(char *port){
 
 }
 
+/*
+    Finds a player from players in the game by name
+*/
+Player *find_player(Player **ps, char *name){
+    return NULL;
+}
+
+// deals with a player sending a guess
+void handle_guess(Player *p, cJSON *data, Wordle *w){
+    cJSON *guess_J = cJSON_GetObjectItemCaseSensitive(data, "guess");
+    char *guess = guess_J->valuestring;
+    if (in_word_list(guess) != 0){
+        send_GuessResponse(p, guess, "no");
+        return;
+    }
+    char *res = make_guess(guess, w);
+    p->res = res;
+    p->rec_time = "now";
+    if (is_correct(res) == 0){
+        p->correct = "yes";
+        p->winner = "yes";
+    } else {
+        p->correct = "no";
+        p->winner = "no";
+    }
+    p->state = GUESSED;
+    send_GuessResponse(p, guess, "yes");
+}
+
 int main(int argc, char *argv[])
 {
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -164,7 +193,7 @@ int main(int argc, char *argv[])
                 */
 
                 for (int i = 0; i < sizeof(players); i++) {
-                    message_player(strcat("join port: ", GAMEPORT), players[i]);
+                    message_player(strcat("join port: ", GAMEPORT), &players[i]);
                 }
 
                 exit(0);

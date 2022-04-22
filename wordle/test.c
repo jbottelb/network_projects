@@ -3,6 +3,18 @@
 #include "wordle.h"
 #include "cJSON.h"
 #include "player.h"
+#include "server/server.h"
+
+int in_word_list(char *word){
+    char string[50];
+    FILE *in_file = fopen("server/word_list.txt", "r");
+    while ( fscanf(in_file,"%s", string) == 1){
+        if(strstr(string, word) != 0) {
+                return 0;
+        }
+    }
+    return 1;
+}
 
 int main() {
     printf("BEGIN\n");
@@ -63,6 +75,13 @@ int main() {
     //send_StartInstance(p, "localhost", "porthole");
 
 
+    char *word = (char *)calloc(1, sizeof(char));
+    word = "bxard";
+    if (in_word_list(word) == 0){
+        printf("Word in list\n");
+    } else {
+        printf("Word not in list\n");
+    }
 
     return 0;
 }
