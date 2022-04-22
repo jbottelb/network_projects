@@ -106,5 +106,12 @@ int main() {
         }
     }
 
+    char *str = "{\"MessageType\" : \"Nope\", \"Data\" : { \"Name\": \"Josh\", \"Text\" : \"I like trains\"}}";
+    printf("%s\n", str);
+    cJSON *item = cJSON_Parse(str);
+    printf("%s\n", cJSON_Print(item));
+    char *str4 = recv_Chat(item);
+    printf("%s", str4);
+
     return 0;
 }
