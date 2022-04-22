@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <time.h>
+#include <math.h>
 #include "wordle.h"
 
 Wordle *create_board (char *name, char *word, int guesses){
@@ -134,6 +135,30 @@ int in_word(char *word, char c){
     return 0;
 }
 
+int score_guess(char *res, int r){
+    double mult = (1 / ((double)r * (double)r)) * 100;
+    int score = 0;
+    int c = 0;
+    if (is_correct(res) == 0){
+        return trunc(3500 * 1 / ((double)r * (double)r));
+    }
+    // round 1 is luck, unless you got it right, just a couple points
+    // 10, just to make sure we correctly gave you a score
+    if (r == 1){
+        return 10;
+    }
+    while (res[c] != '\0'){
+        if (res[c] == 'G'){
+            score += 5;
+        } else if (res[c] == 'Y'){
+            score += 2;
+        }
+        c++;
+    }
+    return trunc(mult * score);;
+}
+
+// not actually needed
 void print_board(Wordle *b){
     printf("Word length: %d Max Guesses: %d\n", b->wordlen, b->max_guesses);
     printf("GUESSES\n");

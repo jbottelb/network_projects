@@ -83,6 +83,7 @@ int main() {
     Player *me = (Player *)calloc(1, sizeof(Player));
     me->winner = "no";
 
+    me->score = 0;
     while (strstr("yes", me->winner) == 0){
         printf("Guess\n");
         char my_guess[5];
@@ -95,6 +96,8 @@ int main() {
         mB->count++;
         printf("Result: %s\n", res);
         printf("Remaining rounds: %d\n", mB->max_guesses - mB->count);
+        me->score += score_guess(res, mB->count);
+        printf("Round Score: %d\n",score_guess(res, mB->count));
         if (is_correct(res) == 0){
             printf("You won the game with in %d rounds!\n", mB->count);
             me->winner = "yes";
@@ -105,6 +108,7 @@ int main() {
             break;
         }
     }
+    printf("Total Score: %d\n", me->score);
 
     char *str = "{\"MessageType\" : \"Nope\", \"Data\" : { \"Name\": \"Josh\", \"Text\" : \"I like trains\"}}";
     printf("%s\n", str);
@@ -112,6 +116,10 @@ int main() {
     printf("%s\n", cJSON_Print(item));
     char *str4 = recv_Chat(item);
     printf("%s", str4);
+
+    char *sc = (char *)calloc(1, sizeof(char));
+    sc = "YGBBB";
+    printf("Score: %d\n", score_guess(sc, 2));
 
     return 0;
 }

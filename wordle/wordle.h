@@ -50,6 +50,8 @@ char *make_guess (char *guess, Wordle *board);
 int is_correct (char *res);
 int in_word_list(char *word);
 char *select_word(Wordle *w);
+int score_guess(char *res, int round);
+
 
 void print_board(Wordle *b);
 
