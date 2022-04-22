@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "wordle.h"
 #include "cJSON.h"
+#include "player.h"
 
 int main() {
     printf("BEGIN\n");
@@ -33,6 +34,35 @@ int main() {
 
     printf("%s\n", cJSON_Print(structure));
     cJSON_Delete(json);
+
+    Player *p = (Player *)calloc(1, sizeof(Player));
+    p->score = 10;
+    p->nonce = 1;
+    p->num = 0;
+    char *name = (char *)calloc(1, sizeof(char));
+    name = "Player0";
+    p->name = name;
+    char *resp = (char *)calloc(1, sizeof(char));
+    resp = "bloop";
+    p->res = resp;
+    char *rec_time = (char *)calloc(1, sizeof(char));
+    rec_time = "bloop";
+    p->rec_time = rec_time;
+    char *correct = (char *)calloc(1, sizeof(char));
+    correct = "yes";
+    p->correct = correct;
+    char *winner = (char *)calloc(1, sizeof(char));
+    winner = "no";
+    p->winner = winner;
+
+    Player *ps[1];
+    ps[0] = p;
+    printf("%s\n", ps[0]->name);
+
+    // must add print statement to work
+    // send_EndGame(p, "Josh", ps);
+
+
 
     return 0;
 }

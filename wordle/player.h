@@ -36,21 +36,23 @@ struct Player {
     PlayerState state;
 };
 
-void message_player(char *message, Player p);
-void send_JoinResult(char *res, Player p);
-void send_Chat(char *text, char *sender, Player p);
-void send_StartInstance(Player p, char *server, char *port);
-void send_JoinInstanceResult(char *res, Player p);
-void send_StartGame(int rounds, Player *players, Player p);
-void send_StartRound(int wordlen, int Round, int remain, Player *players, Player p);
-void send_PromptForGuess(int wordlen, Player p, int guessnum);
-void send_GuestResponse(Player p, char *guess, char *ac);
-void send_GuessResult(Player p, Player *ps, char *win);
-void send_EndRound(Player p, Player *ps, char *win);
-void send_EndGame(Player p, char *winner, Player *players);
+// TODO: Create player function
 
-cJSON *add_player_array(cJSON *json, Player *ps);
-cJSON *add_player_array_gr(cJSON *json, Player *ps);
-cJSON *add_player_array_er(cJSON *json, Player *ps);
+void message_player(char *message, Player *p);
+void send_JoinResult(char *res, Player *p);
+void send_Chat(char *text, char *sender, Player *p);
+void send_StartInstance(Player *p, char *server, char *port);
+void send_JoinInstanceResult(char *res, Player *p);
+void send_StartGame(int rounds, Player **players, Player *p);
+void send_StartRound(int wordlen, int Round, int remain, Player **players, Player *p);
+void send_PromptForGuess(int wordlen, Player *p, int guessnum);
+void send_GuestResponse(Player *p, char *guess, char *ac);
+void send_GuessResult(Player *p, Player **ps, char *win);
+void send_EndRound(Player *p, Player **ps, char *win);
+void send_EndGame(Player *p, char *winner, Player **players);
+
+cJSON *add_player_array(cJSON *json, Player **ps);
+cJSON *add_player_array_gr(cJSON *json, Player **ps);
+cJSON *add_player_array_er(cJSON *json, Player **ps);
 
 #endif
