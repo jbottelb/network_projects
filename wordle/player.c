@@ -167,15 +167,12 @@ void send_GuessResult(Player *p, Player **ps, char *win){
     cJSON_Delete(package);
 }
 
-void send_EndRound(Player *p, Player **ps, char *win){
+void send_EndRound(Player *p, Player **ps, int rem){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "EndRound");
 
     cJSON *message = cJSON_CreateObject();
-    cJSON_AddStringToObject(message, "Name", p->name);
-    cJSON_AddNumberToObject(message, "Player", p->num);
-    cJSON_AddNumberToObject(message, "ScoreEarned", p->score);
-    cJSON_AddStringToObject(message, "Winner", win);
+    cJSON_AddNumberToObject(message, "RoundsRemaining", rem);
 
     add_player_array_er(message, ps);
     cJSON_AddItemToObject(package, "Data", message);
@@ -196,7 +193,6 @@ void send_EndGame(Player *p, char *winner, Player **players){
     cJSON_AddItemToObject(package, "Data", message);
 
     message_player(cJSON_Print(message), p);
-    // printf("%s\n", cJSON_Print(package)); // used with test.c 
     cJSON_Delete(package);
 }
 

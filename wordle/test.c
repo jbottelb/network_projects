@@ -60,7 +60,7 @@ int main() {
     printf("%s\n", ps[0]->name);
 
     // must add print statement to work
-    // send_EndGame(p, "Josh", ps);
+    //send_StartInstance(p, "localhost", "porthole");
 
 
 

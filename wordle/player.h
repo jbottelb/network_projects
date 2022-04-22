@@ -48,7 +48,7 @@ void send_StartRound(int wordlen, int Round, int remain, Player **players, Playe
 void send_PromptForGuess(int wordlen, Player *p, int guessnum);
 void send_GuestResponse(Player *p, char *guess, char *ac);
 void send_GuessResult(Player *p, Player **ps, char *win);
-void send_EndRound(Player *p, Player **ps, char *win);
+void send_EndRound(Player *p, Player **ps, int rem);
 void send_EndGame(Player *p, char *winner, Player **players);
 
 cJSON *add_player_array(cJSON *json, Player **ps);
