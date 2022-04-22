@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-I.
-DEPS = wordle.h cJSON.h
+DEPS = wordle.h cJSON.h player.h
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
