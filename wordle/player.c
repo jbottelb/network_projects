@@ -15,6 +15,7 @@
 #include <errno.h>
 #include "player.h"
 #include "cJSON.h"
+#include "server/server.h"
 
 /*
 
@@ -203,8 +204,20 @@ void send_EndGame(Player p, char *winner, Player *players){
     cJSON_Delete(message);
 }
 
+
 cJSON *add_player_array(cJSON *json, Player *ps){
     cJSON *package = cJSON_CreateObject();
+
+    cJSON *players = cJSON_AddArrayToObject(package, "PlayerInfo");
+
+    for (int i = 0; i < PLAYERS; i++){
+        cJSON *playerInfo = cJSON_CreateObject();
+        cJSON_AddStringToObject(playerInfo, "Name", ps[i].name);
+        cJSON_AddNumberToObject(playerInfo, "Number", ps[i].num);
+        cJSON_AddNumberToObject(playerInfo, "Score", ps[i].score);
+
+        cJSON_AddItemToArray(players, playerInfo);
+    }
 
     return package;
 }
