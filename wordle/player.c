@@ -17,6 +17,8 @@
 #include "cJSON.h"
 #include "server/server.h"
 
+#define SIZE 1024
+
 Player *create_player(char *name, int socket, int num, int nonce){
     Player *new = (Player *)calloc(1, sizeof(Player));
     new->name = name;
@@ -270,7 +272,7 @@ char *recv_Chat(cJSON *message){
     cJSON *data   = cJSON_GetObjectItemCaseSensitive(message, "Data");
     cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
     cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
-    char *mes = (char *)calloc(1, sizeof(char));
+    char *mes = (char *)calloc(SIZE, sizeof(char));
     sprintf(mes, "%s: %s\n", j_name->valuestring, j_text->valuestring);
     return mes;
 }

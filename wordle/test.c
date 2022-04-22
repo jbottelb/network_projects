@@ -36,23 +36,23 @@ int main() {
     printf("%s\n", cJSON_Print(structure));
     cJSON_Delete(json);
 
-    Player *p = (Player *)calloc(1, sizeof(Player));
+    Player *p = (Player *)calloc(128, sizeof(Player));
     p->score = 10;
     p->nonce = 1;
     p->num = 0;
-    char *name = (char *)calloc(1, sizeof(char));
+    char *name = (char *)calloc(128, sizeof(char));
     name = "Player0";
     p->name = name;
-    char *resp = (char *)calloc(1, sizeof(char));
+    char *resp = (char *)calloc(128, sizeof(char));
     resp = "bloop";
     p->res = resp;
-    char *rec_time = (char *)calloc(1, sizeof(char));
+    char *rec_time = (char *)calloc(128, sizeof(char));
     rec_time = "bloop";
     p->rec_time = rec_time;
-    char *correct = (char *)calloc(1, sizeof(char));
+    char *correct = (char *)calloc(128, sizeof(char));
     correct = "yes";
     p->correct = correct;
-    char *winner = (char *)calloc(1, sizeof(char));
+    char *winner = (char *)calloc(128, sizeof(char));
     winner = "no";
     p->winner = winner;
 
@@ -64,7 +64,7 @@ int main() {
     //send_StartInstance(p, "localhost", "porthole");
 
 
-    char *word = (char *)calloc(1, sizeof(char));
+    char *word = (char *)calloc(128, sizeof(char));
     word = "bxard";
     if (in_word_list(word) == 0){
         printf("Word in list\n");
@@ -80,7 +80,7 @@ int main() {
     // Lets play a game
     printf("Play Game\n");
     printf("Cheat: %s\n", mword);
-    Player *me = (Player *)calloc(1, sizeof(Player));
+    Player *me = (Player *)calloc(128, sizeof(Player));
     me->winner = "no";
 
     me->score = 0;
@@ -117,7 +117,7 @@ int main() {
     char *str4 = recv_Chat(item);
     printf("%s", str4);
 
-    char *sc = (char *)calloc(1, sizeof(char));
+    char *sc = (char *)calloc(128, sizeof(char));
     sc = "YGBBB";
     printf("Score: %d\n", score_guess(sc, 2));
 
