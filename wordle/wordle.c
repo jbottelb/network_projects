@@ -77,27 +77,23 @@ char *select_word(Wordle *w){
     srand((unsigned) time(&t));
     index = rand() % num;
     // now we move forward that many spaces, then select that word
-    char string[BUFSIZ];
+    char string[5];
     FILE *file = fopen("server/word_list.txt", "r");
-    while ( fscanf(file, "%s", string) == 1){
+    while ( fscanf(file, "%s", string) ){
         int i = 0;
-        while (string[i] != '\0'){
-            if (index == 0){
-                int k = 0;
-                while (k != ' ' && k != '\0'){
-                    word[k] = string[i + k];
-                    k++;
-                }
-                w->wordlen = k;
-                w->word = word;
-                fclose(file);
-                return word;
+        if (index == 0){
+            int k = 0;
+            while (string[k] != '\0'){
+                word[k] = string[k];
+                k++;
             }
-            if (string[i] == ' '){
-                index--;
-            }
-            i++;
+            w->wordlen = k;
+            w->word = word;
+            fclose(file);
+            return word;
         }
+        index--;
+        i++;
     }
     fclose(file);
     return word;
