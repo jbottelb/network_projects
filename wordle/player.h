@@ -37,6 +37,7 @@ struct Player {
 };
 
 // TODO: Create player function
+Player *create_player(char *name, int socker, int num);
 
 void message_player(char *message, Player *p);
 void send_JoinResult(char *res, Player *p);

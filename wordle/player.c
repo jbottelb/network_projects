@@ -17,6 +17,11 @@
 #include "cJSON.h"
 #include "server/server.h"
 
+Player *create_player(char *name, int socker, int num){
+    return NULL;
+}
+
+
 /*
 
 */

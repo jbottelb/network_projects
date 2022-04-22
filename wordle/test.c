@@ -73,7 +73,38 @@ int main() {
     }
 
     Wordle *w = calloc(1, sizeof(Wordle));
-    printf("%s\n", select_word(w));
+    char *mword = select_word(w);
+
+    Wordle *mB = create_board("NAME", mword, 6);
+
+    // Lets play a game
+    printf("Play Game\n");
+    printf("Cheat: %s\n", mword);
+    Player *me = (Player *)calloc(1, sizeof(Player));
+    me->winner = "no";
+
+    while (strstr("yes", me->winner) == 0){
+        printf("Guess\n");
+        char my_guess[5];
+        scanf("%s", my_guess);
+        if (in_word_list(my_guess) == 1){
+            printf("Not in word list\n");
+            continue;
+        }
+        char *res = make_guess(my_guess, mB);
+        mB->count++;
+        printf("Result: %s\n", res);
+        printf("Remaining rounds: %d\n", mB->max_guesses - mB->count);
+        if (is_correct(res) == 0){
+            printf("You won the game with in %d rounds!\n", mB->count);
+            me->winner = "yes";
+            break;
+        }
+        if (mB->max_guesses - mB->count == 0){
+            printf("You did not get the word.\n");
+            break;
+        }
+    }
 
     return 0;
 }

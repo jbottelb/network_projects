@@ -60,7 +60,6 @@ char *make_guess (char *guess, Wordle *board){
         }
         board->Letters[board->count][i] = guess[i];
     }
-    board->count++;
     if (won == 1){
         board->state = WON;
         return res;
