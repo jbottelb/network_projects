@@ -134,7 +134,8 @@ int main(int argc, char *argv[])
 
         Player *player = (Player *)calloc(1, sizeof(Player));
 
-        char message[SIZE] = "join up hoe";
+        char *message = (char *)calloc(BUFSIZ, sizeof(char));
+        message = "yes";
         int numread;
         int count = 0, it = 0;
 
@@ -142,10 +143,9 @@ int main(int argc, char *argv[])
             count++;
         }
 
-        printf("%d\n", count);
-
-        if ((numread = send(sockfd, message, count, 0)) == -1) {
+        if ((numread = send(new_fd, message, count, 0)) == -1) {
                 printf("server: error sending data packet. \n");
+                printf("%s\n", strerror(errno));
                 exit(1);
         }
 
