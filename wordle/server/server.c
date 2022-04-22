@@ -43,7 +43,6 @@ void start_game(char *port){
 
     // calculate restuls, report results
 
-    return;
 }
 
 int main(int argc, char *argv[])
@@ -134,6 +133,8 @@ int main(int argc, char *argv[])
             s, sizeof s);
         printf("server: got connection from %s\n", s);
 
+        Player *player = (Player *)calloc(1, sizeof(Player));
+
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */
@@ -147,6 +148,11 @@ int main(int argc, char *argv[])
                 /*
                     Message all players to join game lobby, then drop them
                 */
+
+                for (int i = 0; i < sizeof(players); i++) {
+                    message_player(strcat("join port: ", GAMEPORT), players[i]);
+                }
+
                 exit(0);
             }
         }
@@ -158,64 +164,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void send_result_to_client(int sockfd, int success, request *req)
-{
-    return;
-}
-
-void send_result_to_client_with_data(int sockfd, int success, request *req, event **events)
-{
-    int numread;
-    char *data = (char *)calloc(BUFSIZ, sizeof(char));
-
-    strcat(data, "{\"command\": \"");
-    if (req->type == 3) {
-        strcat(data, "get");
-    }
-    else if (req->type == 4) {
-        strcat(data, "getall");
-    }
-
-    strcat(data, "\", \"calendar\": \"");
-    strcat(data, req->calName);
-    strcat(data, "\", \"identifier\": \"");
-
-    if (success == 0) {
-        strcat(data, "event identifiers in data");
-        strcat(data, "\", \"success\": \"");
-        strcat(data, "True\", \"error\": \"None\", \"data\": [ ");
-
-        int i = 0;
-        while(events[i]) {
-            if (i != 0) {
-                strcat(data, ", ");
-            }
-            char *e = (char *)calloc(BUFSIZ, sizeof(char));
-            e = string_from_event(events[i]);
-            strcat(data, e);
-            i++;
-        }
-
-        strcat(data, " ]");
-    }
-    else {
-        strcat(data, "XXXX");
-        strcat(data, "\", \"success\": \"");
-        strcat(data, "True\", \"error\": \"None\", \"data\": \"No events in the date range\"}");
-    }
-    int count = 0, it = 0;
-    while (data[it++] != '\0') {
-        count++;
-    }
-    // Handles edge case where the read is smaller than the buffer size
-    if ((numread = send(sockfd, data, count, 0)) == -1) {
-            printf("server: error sending data packet. \n");
-            exit(1);
-    }
-}
-
-request *accept_request(int sock)
-{
+/*
     int file_size, numbytes;
     char buf[SIZE];
 
@@ -228,10 +177,7 @@ request *accept_request(int sock)
     // Add null terminator
     buf[numbytes] = '\0';
     printf("server: received request\n%s\n", buf);
-
-    request *request = request_from_string(buf);
-    return request;
-}
+*/
 
 void *get_in_addr(struct sockaddr *sa)
 {
