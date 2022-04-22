@@ -75,7 +75,7 @@ void send_Chat(char *text, char *sender, Player *p){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -90,7 +90,7 @@ void send_StartInstance(Player *p, char *server, char *port){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -105,7 +105,7 @@ void send_JoinInstanceResult(char *res, Player *p){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -119,7 +119,7 @@ void send_StartGame(int rounds, Player **players, Player *p){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -135,7 +135,7 @@ void send_StartRound(int wordlen, int Round, int remain, Player **players, Playe
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -150,7 +150,7 @@ void send_PromptForGuess(int wordlen, Player *p, int guessnum){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -165,7 +165,7 @@ void send_GuessResponse(Player *p, char *guess, char *ac){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -179,7 +179,7 @@ void send_GuessResult(Player *p, Player **ps, char *win){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -193,7 +193,7 @@ void send_EndRound(Player *p, Player **ps, int rem){
     add_player_array_er(message, ps);
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -208,7 +208,7 @@ void send_EndGame(Player *p, char *winner, Player **players){
 
     cJSON_AddItemToObject(package, "Data", message);
 
-    message_player(cJSON_Print(message), p);
+    message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
@@ -289,4 +289,16 @@ char *recv_Guess(cJSON *message, Player *p){
     cJSON *data = cJSON_GetObjectItemCaseSensitive(message, "Data");
     cJSON *guess = cJSON_GetObjectItemCaseSensitive(data, "Guess");
     return guess->valuestring;
+}
+
+Player *find_player(Player **ps, char *name){
+    int i = 0;
+    Player *p = ps[i];
+    while (p){
+        if (strcat(p[0].name, name) == 0){
+            return p;
+        }
+        p = ps[++i];
+    }
+    return NULL;
 }

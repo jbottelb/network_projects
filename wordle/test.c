@@ -80,7 +80,7 @@ int main() {
     // Lets play a game
     printf("Play Game\n");
     printf("Cheat: %s\n", mword);
-    Player *me = (Player *)calloc(128, sizeof(Player));
+    Player *me = (Player *)calloc(1, sizeof(Player));
     me->winner = "no";
 
     me->score = 0;
@@ -122,6 +122,18 @@ int main() {
     printf("Score: %d\n", score_guess(sc, 2));
 
     printf("Censored word: %s\n", censor("applefuck"));
+
+    Player *p1 = create_player("Joe", 0, 0, 0);
+    Player *p2 = create_player("Josh", 0, 0, 0);
+
+    Player **pls = calloc(1, sizeof(Player *));
+    pls[0] = p1;
+    pls[1] = p2;
+    Player *found = find_player(pls, "Joe");
+    if (found){
+        printf("Found Player: %s\n", found->name);
+    }
+
 
     return 0;
 }

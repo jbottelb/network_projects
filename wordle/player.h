@@ -62,4 +62,6 @@ cJSON *add_player_array(cJSON *json, Player **ps);
 cJSON *add_player_array_gr(cJSON *json, Player **ps);
 cJSON *add_player_array_er(cJSON *json, Player **ps);
 
+
+Player *find_player(Player **ps, char *name);
 #endif

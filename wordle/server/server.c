@@ -45,13 +45,6 @@ void start_game(char *port){
 
 }
 
-/*
-    Finds a player from players in the game by name
-*/
-Player *find_player(Player **ps, char *name){
-    return NULL;
-}
-
 // deals with a player sending a guess
 void handle_guess(Player *p, cJSON *data, Wordle *w){
     cJSON *guess_J = cJSON_GetObjectItemCaseSensitive(data, "guess");
@@ -172,7 +165,7 @@ int main(int argc, char *argv[])
 
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
-        
+
         Player *p = create_player(name->valuestring, new_fd, player_count, 0);
         players[player_count] = *p;
         player_count++;
