@@ -70,6 +70,7 @@ void handle_guess(Player *p, cJSON *data, Wordle *w){
         p->winner = "no";
     }
     p->state = GUESSED;
+    // TODO: Score player
     send_GuessResponse(p, guess, "yes");
 }
 
