@@ -26,7 +26,8 @@ def send_request(req):
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            rec = sock.recv(4096)
+            rec = sock.recv(9128)
+            print(rec)
             join = json.loads(rec.decode())
             print(join)
 
@@ -41,6 +42,8 @@ def send_request(req):
             sock.sendall(json.dumps(req).encode())
 
             rec = sock.recv(4096)
+            print("WHY THO")
+            print(rec)
             join = json.loads(rec.decode())
             print(join)
 

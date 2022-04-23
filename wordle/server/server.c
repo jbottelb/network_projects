@@ -127,9 +127,8 @@ void start_game(char *new_port, Player **players, int nonce){
         int in_players = 1;
         for (int i = 0; i < PLAYERS; i++) {
             if (strcmp(players[i]->name, p->name) == 0 && nonce == p->nonce) {
-                printf("SHure fuck it \n");
                 char* response = "yes";
-                send_JoinInstanceResult(response, players[i]);
+                send_JoinInstanceResult(response, p);
                 player_count++;
                 in_players = 0;
             }
