@@ -17,7 +17,6 @@
 #include "wordle.h"
 #include "cJSON.h"
 
-#define PLAYERS 1
 
 void sigchld_handler(int s);
 char *accept_request(int sock);

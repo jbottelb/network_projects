@@ -294,11 +294,14 @@ char *recv_Guess(cJSON *message, Player *p){
 Player *find_player(Player **ps, char *name){
     int i = 0;
     Player *p = ps[i];
-    while (p){
-        if (strcat(p[0].name, name) == 0){
+    while (i < 2){
+        printf("%s %s\n", name, p[i].name);
+        if (strcmp(p[i].name, name) == 0){
+            printf("%s\n", "Returning");
             return p;
         }
-        p = ps[++i];
+        i++;
+        p = ps[i];
     }
     return NULL;
 }

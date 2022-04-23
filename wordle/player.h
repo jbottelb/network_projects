@@ -18,6 +18,8 @@
 #include <errno.h>
 #include "cJSON.h"
 
+#define PLAYERS 1
+
 typedef enum {
     GUESSED, GUESSING, WAITING
 } PlayerState;

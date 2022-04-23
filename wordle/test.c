@@ -123,17 +123,23 @@ int main() {
 
     printf("Censored word: %s\n", censor("applefuck"));
 
-    Player *p1 = create_player("Joe", 0, 0, 0);
-    Player *p2 = create_player("Josh", 0, 0, 0);
+    char *jh = (char *)calloc(128, sizeof(char));
+    char *je = (char *)calloc(128, sizeof(char));
+    jh = "Josh";
+    je = "Joe";
+    Player *p1 = create_player(je, 0, 0, 0);
+    Player *p2 = create_player(jh, 0, 0, 0);
 
-    Player **pls = calloc(1, sizeof(Player *));
+    Player **pls = calloc(16, sizeof(Player *));
     pls[0] = p1;
     pls[1] = p2;
-    Player *found = find_player(pls, "Joe");
+    printf("%s\n", pls[1]->name);
+    Player *found = find_player(pls, "Josh");
     if (found){
         printf("Found Player: %s\n", found->name);
+    } else {
+        printf("%s\n", "No found player");
     }
-
 
     return 0;
 }
