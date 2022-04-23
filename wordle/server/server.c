@@ -13,6 +13,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/select.h>
 #include "server.h"
 #include "player.h"
 #include "wordle.h"
@@ -117,6 +118,7 @@ void start_game(char *new_port, Player **players, int nonce){
 
         cJSON *join_result = cJSON_Parse(message);
         Player *p = recv_JoinInstance(join_result, new_fd, 0);
+        players[0] = p;
         /*
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
@@ -142,21 +144,35 @@ void start_game(char *new_port, Player **players, int nonce){
 
         if (player_count == PLAYERS){
             for (int i = 0; i < player_count; i++) {
-                send_StartGame(ROUNDS, players, players[i]);
-
-                // Closes socket and returns to listening for new connections
-                //close(players[i].socket);
+                printf("YEET MOTHERFUCKER\n");
+                send_StartGame(ROUNDS, players, p);
             }
+            break;
         }
 
     }
 
+
     // create game instance select word, create "Board"
+    Wordle *w = create_board("Fucknuts", ROUNDS);
+    char *word = select_word(w);
+    printf("Word is %s\n", word);
+    int round = 1;
 
-    // while loop to listen for everyone to join, with select for messaging
+    while (1){
+        for (int i = 0; i < player_count; i++) {
+            printf("YEET MOTHERFUCKER\n");
+            send_StartRound(w->wordlen, round, ROUNDS - round, players, players[0]);
+            send_PromptForGuess(w->wordlen, players[0], round);
+        }
 
-    // once everyones here, start playing
 
+
+
+
+        round++;
+        break;
+    }
     /*
     Game Loop
     for loop for all guesses,

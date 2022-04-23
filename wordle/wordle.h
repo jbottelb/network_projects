@@ -40,7 +40,7 @@ struct Wordle {
     GameState   state;
 };
 
-Wordle *create_board (char *name, char *word, int guesses);
+Wordle *create_board (char *name, int guesses);
 
 /*
     Updates board appropriately and returns the result of the guess

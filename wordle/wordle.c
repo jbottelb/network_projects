@@ -17,24 +17,14 @@
 #include <math.h>
 #include "wordle.h"
 
-Wordle *create_board (char *name, char *word, int guesses){
+Wordle *create_board (char *name, int guesses){
     Wordle *board = (Wordle *)calloc(1, sizeof(Wordle));
     board->name = name;
-    board->word = word;
     board->count = 0;
     board->state = CREATED;
     board->max_guesses = guesses;
     if (guesses){
         board->max_guesses = guesses;
-    }
-    int l;
-    for (l = 0; word[l] != '\0'; ++l);
-    board->wordlen = l;
-    for (int i = 0; i < guesses; i++){
-        for (int j = 0; j < l; j++){
-            board->Guesses[i][j] = EMPTY;
-            board->Letters[i][j] = ' ';
-        }
     }
     return board;
 }

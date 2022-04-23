@@ -42,8 +42,6 @@ def send_request(req):
             sock.sendall(json.dumps(req).encode())
 
             rec = sock.recv(4096)
-            print("WHY THO")
-            print(rec)
             join = json.loads(rec.decode())
             print(join)
 
@@ -51,17 +49,14 @@ def send_request(req):
                 exit(0)
             else:
                 rec = sock.recv(4096)
-                join = json.loads(rec.decode())
-                print(join)
+                result = json.loads(rec.decode())
+                print(result)
 
-                '''
                 while result["MessageType"] != "EndGame":
-                    print("made it here")
-                    #result = sock.recv(4096)
-                    #print(result)
+                    rec = sock.recv(4096)
+                    result = json.loads(rec.decode())
+                    print(result)
                     #Build request listen types and responses
-                    exit(0)
-                '''
         else:
             print("Something went wrong if we got here")
             exit(1)
