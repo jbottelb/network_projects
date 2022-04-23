@@ -24,8 +24,128 @@
 #define BACKLOG 10
 #define MAXPLAYERS 100
 
-void start_game(char *port){
+void start_game(char *new_port, Player **players, int nonce){
+    printf("Entered GAME\n");
+    
     // start up socket
+    int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+    struct addrinfo hints, *servinfo, *p;
+    struct sockaddr_storage their_addr; // connector's address information
+    socklen_t sin_size;
+    struct sigaction sa;
+    int yes=1;
+    char s[INET6_ADDRSTRLEN];
+    int rv;
+    char *port = (char *)calloc(BUFSIZ, 1);
+    port = new_port;   
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // use my IP
+
+    if ((rv = getaddrinfo(NULL, port, &hints, &servinfo)) != 0) {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        exit(1);
+    }
+
+    // loop through all the results and bind to the first we can
+    for(p = servinfo; p != NULL; p = p->ai_next) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype,
+                p->ai_protocol)) == -1) {
+            perror("server: socket");
+            continue;
+        }
+
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                sizeof(int)) == -1) {
+            perror("setsockopt");
+            exit(1);
+        }
+
+        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
+            perror("server: bind");
+            continue;
+        }
+
+        break;
+    }
+
+    freeaddrinfo(servinfo); // all done with this structure
+
+    if (!p)  {
+        fprintf(stderr, "server: failed to bind\n");
+        exit(1);
+    }
+
+    if (listen(sockfd, BACKLOG) == -1) {
+        perror("listen");
+        exit(1);
+    }
+
+    sa.sa_handler = sigchld_handler; // reap all dead processes
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+        perror("sigaction");
+        exit(1);
+    }
+
+    printf("server: waiting for connections...\n");
+
+    int player_count = 0;
+
+    while(1) {  // main accept() loop
+        sin_size = sizeof their_addr;
+        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+        if (new_fd == -1) {
+            perror("accept");
+            continue;
+        }
+
+        inet_ntop(their_addr.ss_family,
+            get_in_addr((struct sockaddr *)&their_addr),
+            s, sizeof s);
+        printf("server: got connection from %s\n", s);
+
+        // Receive join or joininstance request
+        char *message = accept_request(new_fd);
+        printf("%s\n", message);
+
+        cJSON *join_result = cJSON_Parse(message);
+
+        cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
+        cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+        cJSON *p_nonce = cJSON_GetObjectItemCaseSensitive(data, "Nonce");
+
+        Player *p = create_player(name->valuestring, new_fd, player_count, p_nonce->valueint);
+
+        int in_players = 1;
+        for (int i = 0; i < PLAYERS; i++) {
+            if (strcmp(players[i]->name, name->valuestring) == 0 && nonce == p_nonce->valueint) {
+                char* response = "yes";
+                send_JoinInstanceResult(response, players[i]);
+                player_count++;
+                in_players = 0;
+            }
+        }
+
+        if (in_players == 1) {
+            char* response = "no";
+            send_JoinInstanceResult(response, p);
+        }
+
+        if (player_count == PLAYERS){
+            for (int i = 0; i < player_count; i++) {
+                //send_StartInstance(&players[i], "localhost", GAMEPORT);
+
+                // Closes socket and returns to listening for new connections
+                //close(players[i].socket);
+            }
+        }
+
+    }
 
     // create game instance select word, create "Board"
 
@@ -79,12 +199,7 @@ int main(int argc, char *argv[])
     char s[INET6_ADDRSTRLEN];
     int rv;
     char *port = (char *)calloc(BUFSIZ, 1);
-    int mt = -1;
-
-    port = PORT;
-
-    if (argc == 2)
-        { mt = 0; }
+    port = PORT;   
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -140,7 +255,8 @@ int main(int argc, char *argv[])
     }
 
     printf("server: waiting for connections...\n");
-    Player players[MAXPLAYERS];
+    Player **players = (Player **)calloc(MAXPLAYERS, sizeof(Player *));
+    int nonce = rand() % BUFSIZ;
     int player_count = 0;
 
     while(1) {  // main accept() loop
@@ -166,8 +282,8 @@ int main(int argc, char *argv[])
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
         
-        Player *p = create_player(name->valuestring, new_fd, player_count, 0);
-        players[player_count] = *p;
+        Player *p = create_player(name->valuestring, new_fd, player_count, nonce);
+        players[player_count] = p;
         player_count++;
 
         char* response = "yes";
@@ -182,16 +298,15 @@ int main(int argc, char *argv[])
                 continue;
             }
             else if(pid == 0) {
-                start_game(GAMEPORT);
-                
                 //Message all players to join game lobby, then drop them
                 for (int i = 0; i < player_count; i++) {
-                    printf("now were grooving\n");
-                    send_StartInstance(&players[i], "localhost", GAMEPORT);
-                    
+                    send_StartInstance(players[i], "localhost", GAMEPORT);
+
                     // Closes socket and returns to listening for new connections
-                    close(players[i].socket);
+                    close(players[i]->socket);
                 }
+
+                start_game(GAMEPORT, players, nonce);
             }
         }
     }
