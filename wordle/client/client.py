@@ -36,7 +36,9 @@ def send_request(req):
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
-                print("ok ok ok")
+                rec = sock.recv(4096)
+                join = json.loads(rec.decode())
+                print(join)
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())

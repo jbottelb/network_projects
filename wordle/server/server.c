@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
-
+        
         Player *p = create_player(name->valuestring, new_fd, player_count, 0);
         players[player_count] = *p;
         player_count++;
@@ -176,8 +176,9 @@ int main(int argc, char *argv[])
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */
+            printf("yes\n");
             pid_t pid = fork();
-
+            
             if(pid < 0){
                 continue;
             }
@@ -186,12 +187,12 @@ int main(int argc, char *argv[])
                 /*
                     Message all players to join game lobby, then drop them
                 */
-
-                for (int i = 0; i < sizeof(players); i++) {
-                    message_player(strcat("join port: ", GAMEPORT), &players[i]);
+                printf("its happening\n");
+                
+                for (int i = 0; i < player_count; i++) {
+                    printf("now were grooving\n");
+                    send_StartInstance(&players[i], "localhost", GAMEPORT);
                 }
-
-                exit(0);
             }
         }
 
