@@ -77,7 +77,7 @@ def build_data_join():
     args["Port"] = sys.argv[7]
 
     if sys.argv[1] == "JoinInstance":
-        args["Nonce"] = sys.argv[9]
+        args["Nonce"] = int(sys.argv[9])
     elif sys.argv[1] == "Join":
         pass
     else:

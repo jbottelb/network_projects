@@ -281,6 +281,7 @@ Player *recv_JoinInstance(cJSON *message, int sock, int num){
     cJSON *data = cJSON_GetObjectItemCaseSensitive(message, "Data");
     cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
     cJSON *nonce = cJSON_GetObjectItemCaseSensitive(data, "Nonce");
+
     Player *new = create_player(name->valuestring, sock, num, nonce->valueint);
     return new;
 }

@@ -25,8 +25,9 @@
 #define MAXPLAYERS 100
 
 void start_game(char *new_port, Player **players, int nonce){
-    printf("Entered GAME\n");
-    
+    printf("GAME LAUNCHED\n");
+    printf("GAME NONCE: %d\n", nonce);
+
     // start up socket
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -37,7 +38,7 @@ void start_game(char *new_port, Player **players, int nonce){
     char s[INET6_ADDRSTRLEN];
     int rv;
     char *port = (char *)calloc(BUFSIZ, 1);
-    port = new_port;   
+    port = new_port;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -75,7 +76,7 @@ void start_game(char *new_port, Player **players, int nonce){
     freeaddrinfo(servinfo); // all done with this structure
 
     if (!p)  {
-        fprintf(stderr, "server: failed to bind\n");
+        fprintf(stderr, "game: failed to bind\n");
         exit(1);
     }
 
@@ -92,7 +93,7 @@ void start_game(char *new_port, Player **players, int nonce){
         exit(1);
     }
 
-    printf("server: waiting for connections...\n");
+    printf("game: waiting for connections...\n");
 
     int player_count = 0;
 
@@ -107,24 +108,26 @@ void start_game(char *new_port, Player **players, int nonce){
         inet_ntop(their_addr.ss_family,
             get_in_addr((struct sockaddr *)&their_addr),
             s, sizeof s);
-        printf("server: got connection from %s\n", s);
+        printf("game: got connection from %s\n", s);
 
         // Receive join or joininstance request
         char *message = accept_request(new_fd);
         printf("%s\n", message);
 
         cJSON *join_result = cJSON_Parse(message);
-
+        Player *p = recv_JoinInstance(join_result, new_fd, 0);
+        /*
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
         cJSON *p_nonce = cJSON_GetObjectItemCaseSensitive(data, "Nonce");
 
         Player *p = create_player(name->valuestring, new_fd, player_count, p_nonce->valueint);
+        */
 
-        printf("%s %s %d %d\n", players[0]->name, name->valuestring, nonce, p_nonce->valueint);
         int in_players = 1;
         for (int i = 0; i < PLAYERS; i++) {
-            if (strcmp(players[i]->name, name->valuestring) == 0 && nonce == p_nonce->valueint) {
+            if (strcmp(players[i]->name, p->name) == 0 && nonce == p->nonce) {
+                printf("SHure fuck it \n");
                 char* response = "yes";
                 send_JoinInstanceResult(response, players[i]);
                 player_count++;
@@ -200,7 +203,7 @@ int main(int argc, char *argv[])
     char s[INET6_ADDRSTRLEN];
     int rv;
     char *port = (char *)calloc(BUFSIZ, 1);
-    port = PORT;   
+    port = PORT;
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -282,7 +285,7 @@ int main(int argc, char *argv[])
 
         cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
-        
+
         Player *p = create_player(name->valuestring, new_fd, player_count, nonce);
         players[player_count] = p;
         player_count++;
@@ -294,7 +297,7 @@ int main(int argc, char *argv[])
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */
             pid_t pid = fork();
-            
+
             if(pid < 0){
                 continue;
             }
