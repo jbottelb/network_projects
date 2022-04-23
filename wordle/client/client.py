@@ -26,8 +26,6 @@ def send_request(req):
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            print("Request sent")
-
             rec = sock.recv(4096)
             join = json.loads(rec.decode())
 

@@ -176,7 +176,6 @@ int main(int argc, char *argv[])
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */
-            printf("yes\n");
             pid_t pid = fork();
             
             if(pid < 0){
@@ -184,20 +183,17 @@ int main(int argc, char *argv[])
             }
             else if(pid == 0) {
                 start_game(GAMEPORT);
-                /*
-                    Message all players to join game lobby, then drop them
-                */
-                printf("its happening\n");
                 
+                //Message all players to join game lobby, then drop them
                 for (int i = 0; i < player_count; i++) {
                     printf("now were grooving\n");
                     send_StartInstance(&players[i], "localhost", GAMEPORT);
+                    
+                    // Closes socket and returns to listening for new connections
+                    close(players[i].socket);
                 }
             }
         }
-
-        // Closes socket and returns to listening for new connections
-        close(new_fd);
     }
 
     return 0;
