@@ -121,6 +121,7 @@ void start_game(char *new_port, Player **players, int nonce){
 
         Player *p = create_player(name->valuestring, new_fd, player_count, p_nonce->valueint);
 
+        printf("%s %s %d %d\n", players[0]->name, name->valuestring, nonce, p_nonce->valueint);
         int in_players = 1;
         for (int i = 0; i < PLAYERS; i++) {
             if (strcmp(players[i]->name, name->valuestring) == 0 && nonce == p_nonce->valueint) {
