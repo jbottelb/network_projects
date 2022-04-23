@@ -23,6 +23,7 @@
 #define SIZE 1000
 #define BACKLOG 10
 #define MAXPLAYERS 100
+#define ROUNDS 6
 
 void start_game(char *new_port, Player **players, int nonce){
     printf("GAME LAUNCHED\n");
@@ -141,7 +142,7 @@ void start_game(char *new_port, Player **players, int nonce){
 
         if (player_count == PLAYERS){
             for (int i = 0; i < player_count; i++) {
-                //send_StartInstance(&players[i], "localhost", GAMEPORT);
+                send_StartGame(ROUNDS, players, players[i]);
 
                 // Closes socket and returns to listening for new connections
                 //close(players[i].socket);
