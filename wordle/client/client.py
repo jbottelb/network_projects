@@ -26,37 +26,61 @@ def send_request(req):
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            rec = sock.recv(9128)
-            print(rec)
+            rec = sock.recv(1024)
             join = json.loads(rec.decode())
             print(join)
 
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
-                rec = sock.recv(4096)
+                rec = sock.recv(1024)
                 join = json.loads(rec.decode())
                 print(join)
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            rec = sock.recv(4096)
+            rec = sock.recv(1024)
             join = json.loads(rec.decode())
             print(join)
 
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
-                rec = sock.recv(4096)
+                # Start Game message
+                rec = sock.recv(1024)
                 result = json.loads(rec.decode())
                 print(result)
 
-                while result["MessageType"] != "EndGame":
-                    rec = sock.recv(4096)
+                for _ in range(int(result["Data"]["Rounds"])):
+                    # Start Round
+                    rec = sock.recv(1024)
                     result = json.loads(rec.decode())
                     print(result)
-                    #Build request listen types and responses
+
+                    # Prompt for Guess
+                    rec = sock.recv(1024)
+                    result = json.loads(rec.decode())
+                    print(result)
+
+                    # Guess logic
+                    while True:
+                        # Build and send Guess
+                        guess, args = {}, {}
+                        guess["MessageType"] = sys.argv[0]
+                        args["Name"] = sys.argv[1]
+                        args["Guess"] = sys.argv[2]
+                        guess["Data"] = args
+                        sock.sendall(json.dumps(guess).encode())
+                        
+                        # Guess Response
+                        rec = sock.recv(1024)
+                        result = json.loads(rec.decode())
+                        print(result)
+
+                        if result["Data"]["Accepted"] == "yes":
+                            break
+                                       
         else:
             print("Something went wrong if we got here")
             exit(1)

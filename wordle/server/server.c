@@ -98,8 +98,9 @@ void start_game(char *new_port, Player **players, int nonce){
     printf("game: waiting for connections...\n");
 
     int player_count = 0;
+    int start_game = 1;
 
-    while(1) {  // main accept() loop
+    while(start_game == 1) {  // main accept() loop
         sin_size = sizeof their_addr;
         new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
         if (new_fd == -1) {
@@ -132,6 +133,7 @@ void start_game(char *new_port, Player **players, int nonce){
             if (strcmp(players[i]->name, p->name) == 0 && nonce == p->nonce) {
                 char* response = "yes";
                 send_JoinInstanceResult(response, p);
+                sleep(1);
                 player_count++;
                 in_players = 0;
             }
@@ -144,27 +146,44 @@ void start_game(char *new_port, Player **players, int nonce){
 
         if (player_count == PLAYERS){
             for (int i = 0; i < player_count; i++) {
-                printf("YEET MOTHERFUCKER\n");
                 send_StartGame(ROUNDS, players, p);
+                printf("sent start game\n");
+                sleep(1);
+                start_game = 0;
             }
-            break;
+            
         }
-
     }
 
 
     // create game instance select word, create "Board"
     Wordle *w = create_board("Fucknuts", ROUNDS);
-    char *word = select_word(w);
-    printf("Word is %s\n", word);
-    int round = 1;
 
+    //char *word = select_word(w);
+    //fix this later
+
+    char *word = (char *) calloc(5, sizeof(char));
+    word = "death";
+    printf("Word is %s\n", word);
+    w->word = word;
+    w->wordlen = 5;
+
+    int round = 1;
     while (1){
         for (int i = 0; i < player_count; i++) {
-            printf("YEET MOTHERFUCKER\n");
             send_StartRound(w->wordlen, round, ROUNDS - round, players, players[0]);
+            printf("sent start round\n");
+            sleep(1);
             send_PromptForGuess(w->wordlen, players[0], round);
+            printf("sent prompt for guess\n");
         }
+
+        // Select implementation...later
+        
+        // Receive Guess and Check It
+        // Receive join or joininstance request
+        char *guess = accept_request(new_fd);
+        printf("%s\n", guess);
 
 
 
@@ -191,6 +210,7 @@ void handle_guess(Player *p, cJSON *data, Wordle *w){
     char *guess = guess_J->valuestring;
     if (in_word_list(guess) != 0){
         send_GuessResponse(p, guess, "no");
+        sleep(1);
         return;
     }
     char *res = make_guess(guess, w);

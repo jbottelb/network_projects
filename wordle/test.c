@@ -8,7 +8,7 @@
 int main() {
     printf("BEGIN\n");
 
-    Wordle *B = create_board("NAME", "HOARD", 6);
+    Wordle *B = create_board("NAME", 6);
     char *res = make_guess("HAOFF", B);
     printf("RES: %s\n", res);
     printf("GS: %d\n", B->state);
@@ -75,7 +75,7 @@ int main() {
     Wordle *w = calloc(1, sizeof(Wordle));
     char *mword = select_word(w);
 
-    Wordle *mB = create_board("NAME", mword, 6);
+    Wordle *mB = create_board("NAME", 6);
 
     // Lets play a game
     printf("Play Game\n");

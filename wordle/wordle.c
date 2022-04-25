@@ -61,7 +61,7 @@ char *make_guess (char *guess, Wordle *board){
 
 char *select_word(Wordle *w){
     int num = 2314; // number of words in file
-    char *word = (char *) calloc(1, sizeof(char));
+    char *word = (char *) calloc(5, sizeof(char));
     time_t t;
     int index;
     srand((unsigned) time(&t));
