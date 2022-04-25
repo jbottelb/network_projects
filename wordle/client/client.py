@@ -67,20 +67,44 @@ def send_request(req):
                     while True:
                         # Build and send Guess
                         guess, args = {}, {}
-                        guess["MessageType"] = sys.argv[0]
-                        args["Name"] = sys.argv[1]
-                        args["Guess"] = sys.argv[2]
-                        guess["Data"] = args
-                        sock.sendall(json.dumps(guess).encode())
+                        for line in sys.stdin:
+                            line = line.split()
+                            guess["MessageType"] = line[0]
+                            args["Name"] = line[1]
+                            args["Guess"] = line[2]
+                            guess["Data"] = args
+                            print(guess)
+                            sock.sendall(json.dumps(guess).encode())
                         
-                        # Guess Response
-                        rec = sock.recv(1024)
-                        result = json.loads(rec.decode())
-                        print(result)
+                            # Guess Response
+                            rec = sock.recv(1024)
+                            result = json.loads(rec.decode())
+                            print(result)
 
-                        if result["Data"]["Accepted"] == "yes":
-                            break
-                                       
+                            if result["Data"]["Accepted"] == "yes":
+                                break
+                            else:
+                                # Prompt for Guess
+                                rec = sock.recv(1024)
+                                result = json.loads(rec.decode())
+                                print(result)
+                        break
+                    print("guess valid")
+
+                    # Guess Result
+                    rec = sock.recv(1024)
+                    result = json.loads(rec.decode())
+                    print(result)
+
+                    # End Round
+                    rec = sock.recv(1024)
+                    result = json.loads(rec.decode())
+                    print(result)
+                
+                # End Game
+                rec = sock.recv(1024)
+                result = json.loads(rec.decode())
+                print(result)                        
         else:
             print("Something went wrong if we got here")
             exit(1)

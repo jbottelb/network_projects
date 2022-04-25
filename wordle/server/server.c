@@ -169,7 +169,7 @@ void start_game(char *new_port, Player **players, int nonce){
     w->wordlen = 5;
 
     int round = 1;
-    while (1){
+    while (round <= ROUNDS){
         for (int i = 0; i < player_count; i++) {
             send_StartRound(w->wordlen, round, ROUNDS - round, players, players[0]);
             printf("sent start round\n");
@@ -182,16 +182,47 @@ void start_game(char *new_port, Player **players, int nonce){
         
         // Receive Guess and Check It
         // Receive join or joininstance request
-        char *guess = accept_request(new_fd);
+        sleep(5);
+        char* guess_json = (char *)calloc(SIZE, sizeof(char));
+        guess_json = accept_request(new_fd);
+        printf("%s\n", guess_json);
+
+        cJSON *guess_result = cJSON_Parse(guess_json);
+        char* guess = recv_Guess(guess_result, players[0]);
         printf("%s\n", guess);
 
+        /*if (in_word_list(guess) == 0) {
+            printf("here 1\n");
+            send_GuessResponse(players[0], guess, "yes");
+            printf("here 3\n");
+        }
+        else {
+            printf("here 2\n");
+            send_GuessResponse(players[0], guess, "no");
+            printf("here 4\n");
+        }
+        printf("sent guess response\n");
+        */
 
+        send_GuessResponse(players[0], guess, "yes");
+        printf("sent guess response\n");
+        sleep(2);
+        char *res = make_guess(guess, w);
+        w->count++;
 
+        
+        send_GuessResult(players[0], players, res);
+        printf("sent guess result\n");
 
+        sleep(2);
+        send_EndRound(players[0], players, ROUNDS - round);
+        printf("sent end round\n");
 
         round++;
-        break;
     }
+
+    send_EndGame(players[0], players[0]->name, players);
+    printf("sent end game\n");
     /*
     Game Loop
     for loop for all guesses,
