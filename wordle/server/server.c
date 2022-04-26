@@ -198,20 +198,28 @@ void start_game(char *new_port, Player **players, int nonce){
         char *res = make_guess(guess, w);
         players[0]->score += score_guess(res, round);
         players[0]->res = res;
+        int go = 0;
         if (is_correct(res) == 0){
             // correct guess
+            char *yes = (char *)calloc(5 /* Just in case */, sizeof(char));
+            players[0]->winner = "yes";
+            printf("A player has guessed correctly.\n");
             send_GuessResult(players[0], players, "yes");
+            go = 1;
         } else {
             send_GuessResult(players[0], players, "no");
         }
         w->count++;
 
-        send_GuessResult(players[0], players, res);
         printf("sent guess result\n");
 
-        sleep(3);
+        sleep(4);
         send_EndRound(players[0], players, ROUNDS - round);
         printf("sent end round\n");
+        sleep(4);
+        if (go == 1){
+            break;
+        }
 
         round++;
     }

@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 
-def hacky_recv(sock):
-    rec = b''
-    while True:
-        rec += sock.recv(16)
-        try:
-            return json.loads(rec.decode())
-        except:
-            continue
-
 '''
 Client for Calendar
 Python 3, Joe and Josh
@@ -28,6 +19,15 @@ def main():
     else:
         print("WRONG", len(sys.argv))
         exit(1)
+
+def hacky_recv(sock):
+    rec = b''
+    while True:
+        rec += sock.recv(128)
+        try:
+            return json.loads(rec.decode())
+        except:
+            continue
 
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -80,8 +80,7 @@ def send_request(req):
                             sock.sendall(json.dumps(guess).encode())
 
                             # Guess Response
-                            rec = sock.recv(1024)
-                            result = json.loads(rec.decode())
+                            result = hacky_recv(sock)
                             print(result)
 
                             if result["Data"]["Accepted"] == "yes":
@@ -101,6 +100,14 @@ def send_request(req):
                     result = hacky_recv(sock)
                     print(result)
 
+                    win = False
+                    for p in result["Data"]["PlayerInfo"]:
+                        if p["Winner"] == "yes":
+                            print("Game won by", p["Name"])
+                            win = True
+
+                    if win:
+                        break
                 # End Game
                 result = hacky_recv(sock)
                 print(result)
