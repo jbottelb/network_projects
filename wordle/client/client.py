@@ -40,6 +40,7 @@ def hacky_recv(sock):
 
 def chat_handler(sock):
     print("Waiting for server, feel free to chat")
+    print("After server response, exit with Ctrl-D")
     m = {}
     args = {}
     for line in sys.stdin:
@@ -67,6 +68,7 @@ def send_request(req):
                 join = hacky_recv(sock)
                 print(join)
                 x.join()
+                sys.exit(0)
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
@@ -89,31 +91,43 @@ def send_request(req):
                     # Prompt for Guess
                     result = hacky_recv(sock)
                     print(result)
-
+                    flag = "again"
                     # Guess logic
-                    while True:
+                    while flag == "again":
                         # Build and send Guess
                         guess, args = {}, {}
                         for line in sys.stdin:
                             line = line.split()
                             guess["MessageType"] = line[0]
-                            args["Name"] = line[1]
-                            args["Guess"] = line[2]
-                            guess["Data"] = args
-                            print(guess)
-                            sock.sendall(json.dumps(guess).encode())
-
-                            # Guess Response
-                            result = hacky_recv(sock)
-                            print(result)
-
-                            if result["Data"]["Accepted"] == "yes":
-                                break
+                            if (guess["MessageType"] == "Chat"):
+                                m = {}
+                                message = input()
+                                m["MessageType"] = "Chat"
+                                args["Name"] = NAME
+                                args["Text"] = message.strip()
+                                m["Data"] = args
+                                print(m)
+                                sock.sendall(json.dumps(m).encode())
+                                flag = "again"
                             else:
-                                # Prompt for Guess
+                                args["Name"] = NAME
+                                args["Guess"] = line[1]
+                                guess["Data"] = args
+                                print(guess)
+                                sock.sendall(json.dumps(guess).encode())
+
+                                # Guess Response
                                 result = hacky_recv(sock)
                                 print(result)
-                        break
+
+                                if result["Data"]["Accepted"] == "yes":
+                                    flag = "not again"
+                                    break
+                                else:
+                                    # Prompt for Guess
+                                    result = hacky_recv(sock)
+                                    print(result)
+
                     print("guess valid")
 
                     # Guess Result

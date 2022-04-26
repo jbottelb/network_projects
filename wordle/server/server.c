@@ -118,7 +118,6 @@ void start_game(char *new_port, Player **players, int nonce){
             exit(SLEEPTIME);
         }
         for(int i = 0; i <= fdmax; i++) {
-            printf("Reading sockets\n");
             if (FD_ISSET(i, &read_fds)) {
                 if (i == sockfd) {
                     printf("Listener found connection\n");
@@ -197,13 +196,14 @@ void start_game(char *new_port, Player **players, int nonce){
             }
             for(int i = 0; i <= fdmax; i++) {
                 if (FD_ISSET(i, &read_fds)) {
-                    if (1 == 1) {
-                        sleep(SLEEPTIME);
-                        char* guess_json = (char *)calloc(SIZE, sizeof(char));
-                        guess_json = accept_request(i);
-                        printf("%s\n", guess_json);
+                    sleep(SLEEPTIME);
+                    char* guess_json = (char *)calloc(SIZE, sizeof(char));
+                    guess_json = accept_request(i);
+                    printf("%s\n", guess_json);
 
-                        cJSON *guess_result = cJSON_Parse(guess_json);
+                    cJSON *guess_result = cJSON_Parse(guess_json);
+                    cJSON *type = cJSON_GetObjectItemCaseSensitive(guess_result, "MessageType");
+                    if (strcmp(type->valuestring, "Guess") == 0) {
                         cJSON *data = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
                         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
 
@@ -239,6 +239,20 @@ void start_game(char *new_port, Player **players, int nonce){
                             send_GuessResult(p, players, "yes");
                         } else {
                             send_GuessResult(p, players, "no");
+                        }
+                    } else {
+                        printf("Accepted chat\n");
+                        sleep(SLEEPTIME);
+
+                        cJSON *data   = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
+                        cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+                        cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
+                        for (int k = 0; k < PLAYERS; k++){
+                            if (players[k]->socket == i){
+                                continue;
+                            }
+                            printf("Relaying chat %s: %s\n", j_name->valuestring, censor(j_text->valuestring));
+                            send_Chat(censor(j_text->valuestring), j_name->valuestring, players[k]);
                         }
                     }
                 }
