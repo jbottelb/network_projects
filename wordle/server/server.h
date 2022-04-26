@@ -23,6 +23,5 @@ char *accept_request(int sock);
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa);
-void start_game(char *new_port, Player **players, int nonce);
-int in_word_list(char *word);
-void handle_guess(Player *p, cJSON *data, Wordle *w);
+void start_game(char *new_port, Player **players, int nonce, int set_players, int set_rounds, char* dict_file);
+void handle_guess(Player *p, cJSON *data, Wordle *w, char *dict_file);

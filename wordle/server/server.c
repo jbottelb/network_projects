@@ -26,8 +26,10 @@
 #define MAXPLAYERS 100
 #define ROUNDS 6
 #define SLEEPTIME 2
+#define PLAYERS 2
+#define DICT "server/word_list.txt"
 
-void start_game(char *new_port, Player **players, int nonce){
+void start_game(char *new_port, Player **players, int nonce, int set_players, int set_rounds, char* dict_file){
     printf("GAME LAUNCHED\n");
     printf("GAME NONCE: %d\n", nonce);
 
@@ -153,9 +155,9 @@ void start_game(char *new_port, Player **players, int nonce){
             }
         }
 
-        if (player_count == PLAYERS){
+        if (player_count == set_players){
             for (int i = 0; i < player_count; i++) {
-                send_StartGame(ROUNDS, players, players[i]);
+                send_StartGame(set_rounds, players, players[i], set_players);
                 printf("sent start game\n");
                 sleep(SLEEPTIME);
                 start_game = 0;
@@ -165,7 +167,7 @@ void start_game(char *new_port, Player **players, int nonce){
 
 
     // create game instance select word, create "Board"
-    Wordle *w = create_board("Fucknuts", ROUNDS);
+    Wordle *w = create_board("Fucknuts", set_rounds);
     char *word = (char *) calloc(BUFSIZ, sizeof(char));
     word = select_word(w);
 
@@ -174,10 +176,10 @@ void start_game(char *new_port, Player **players, int nonce){
     int round = 1;
     int game_over = 0;
 
-    while (round <= ROUNDS && game_over == 0){
+    while (round <= set_rounds && game_over == 0){
         // Start
         for (int i = 0; i < player_count; i++) {
-            send_StartRound(w->wordlen, round, ROUNDS - round, players, players[i]);
+            send_StartRound(w->wordlen, round, set_rounds - round, players, players[i], set_players);
             printf("sent start round\n");
             sleep(SLEEPTIME);
             send_PromptForGuess(w->wordlen, players[i], round);
@@ -187,7 +189,7 @@ void start_game(char *new_port, Player **players, int nonce){
         // assuming players behave
         int num_guesses = 0;
         // Select implementation... now
-        while(num_guesses < PLAYERS) {
+        while(num_guesses < set_players) {
             read_fds = master;
             if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
                 printf("Failed to select\n");
@@ -206,14 +208,14 @@ void start_game(char *new_port, Player **players, int nonce){
                         cJSON *data = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
                         cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
 
-                        Player *p = find_player(players, name->valuestring);
+                        Player *p = find_player(players, name->valuestring, set_players);
                         printf("Player found: %s\n", p->name);
                         printf("Expected player: %s\n", name->valuestring);
 
                         char* guess = recv_Guess(guess_result, p);
                         printf("%s\n", guess);
 
-                        if (in_word_list(guess) == 0) {
+                        if (in_word_list(guess, dict_file) == 0) {
                             send_GuessResponse(p, guess, "yes");
                         }
                         else {
@@ -236,9 +238,9 @@ void start_game(char *new_port, Player **players, int nonce){
                             p->correct = "yes";
                             printf("A player has guessed correctly.\n");
                             game_over = 1;
-                            send_GuessResult(p, players, "yes");
+                            send_GuessResult(p, players, "yes", set_players);
                         } else {
-                            send_GuessResult(p, players, "no");
+                            send_GuessResult(p, players, "no", set_players);
                         }
                     } else {
                         printf("Accepted chat\n");
@@ -247,7 +249,7 @@ void start_game(char *new_port, Player **players, int nonce){
                         cJSON *data   = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
                         cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
                         cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
-                        for (int k = 0; k < PLAYERS; k++){
+                        for (int k = 0; k < set_players; k++){
                             if (players[k]->socket == i){
                                 continue;
                             }
@@ -261,7 +263,7 @@ void start_game(char *new_port, Player **players, int nonce){
         w->count++;
         sleep(SLEEPTIME);
         for (int i = 0; i < player_count; i++) {
-            send_EndRound(players[i], players, ROUNDS - round);
+            send_EndRound(players[i], players, set_rounds - round, set_players);
             printf("sent end round\n");
         }
         sleep(SLEEPTIME);
@@ -272,16 +274,16 @@ void start_game(char *new_port, Player **players, int nonce){
 
     // end
     for (int i = 0; i < player_count; i++) {
-        send_EndGame(players[i], players[i]->name, players);
+        send_EndGame(players[i], players[i]->name, players, set_players);
         printf("sent end game\n");
     }
 }
 
 // deals with a player sending a guess
-void handle_guess(Player *p, cJSON *data, Wordle *w){
+void handle_guess(Player *p, cJSON *data, Wordle *w, char* dict_file){
     cJSON *guess_J = cJSON_GetObjectItemCaseSensitive(data, "guess");
     char *guess = guess_J->valuestring;
-    if (in_word_list(guess) != 0){
+    if (in_word_list(guess, dict_file) != 0){
         send_GuessResponse(p, guess, "no");
         sleep(1);
         return;
@@ -303,6 +305,43 @@ void handle_guess(Player *p, cJSON *data, Wordle *w){
 
 int main(int argc, char *argv[])
 {
+    int set_players = PLAYERS;
+    int set_rounds = ROUNDS;
+
+    char *dict_file = (char *)calloc(BUFSIZ, 1);
+    dict_file = DICT;
+
+    char *port = (char *)calloc(BUFSIZ, 1);
+    port = PORT;
+
+    char *game_port = (char *)calloc(BUFSIZ, 1);
+    game_port = GAMEPORT;
+
+    for(int i = 1; i < argc; i++) {
+        if(argv[i][0] == '-') {
+            if(argv[i][1] == 'n' && argv[i][2] == 'p') {
+                set_players = atoi(argv[i + 1]);
+            }
+            else if (argv[i][1] == 'l' && argv[i][2] == 'p') {
+                port = argv[i + 1];
+            }
+            else if(argv[i][1] == 'p' && argv[i][2] == 'p') {
+                game_port = argv[i + 1];
+            }
+            else if(argv[i][1] == 'n' && argv[i][2] == 'r') {
+                set_rounds = atoi(argv[i + 1]);
+            }
+            else if(argv[i][1] == 'd') {
+                dict_file = argv[i + 1];
+            } 
+            else {
+                printf("Invalid command line argument: %s\n", argv[i]);
+                exit(1);
+            }
+        }
+    }
+
+
     // socket things
     fd_set master;
     fd_set read_fds;
@@ -318,8 +357,8 @@ int main(int argc, char *argv[])
     int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
-    char *port = (char *)calloc(BUFSIZ, 1);
-    port = PORT;
+
+
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -444,7 +483,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (player_count == PLAYERS){
+        if (player_count == set_players){
             signal(SIGCHLD, SIG_IGN);
             /* Fork off child process to handle request */
             pid_t pid = fork();
@@ -455,13 +494,13 @@ int main(int argc, char *argv[])
             else if(pid == 0) {
                 //Message all players to join game lobby, then drop them
                 for (int i = 0; i < player_count; i++) {
-                    send_StartInstance(players[i], "localhost", GAMEPORT);
+                    send_StartInstance(players[i], "localhost", game_port);
 
                     // Closes socket and returns to listening for new connections
                     close(players[i]->socket);
                 }
 
-                start_game(GAMEPORT, players, nonce);
+                start_game(game_port, players, nonce, set_players, set_rounds, dict_file);
             }
             player_count = 0;
         }

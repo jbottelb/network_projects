@@ -89,9 +89,9 @@ char *select_word(Wordle *w){
     return word;
 }
 
-int in_word_list(char *word){
+int in_word_list(char *word, char* dict_file){
     char string[50];
-    FILE *in_file = fopen("server/word_list.txt", "r");
+    FILE *in_file = fopen(dict_file, "r");
     while ( fscanf(in_file, "%s", string) == 1){
         if(strstr(string, word) != 0) {
             fclose(in_file);

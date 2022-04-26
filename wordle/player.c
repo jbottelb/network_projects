@@ -110,13 +110,13 @@ void send_JoinInstanceResult(char *res, Player *p){
     cJSON_Delete(package);
 }
 
-void send_StartGame(int rounds, Player **players, Player *p){
+void send_StartGame(int rounds, Player **players, Player *p, int num_players){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "StartGame");
 
     cJSON *message = cJSON_CreateObject();
     cJSON_AddNumberToObject(message, "Rounds", rounds);
-    add_player_array(message, players);
+    add_player_array(message, players, num_players);
 
     cJSON_AddItemToObject(package, "Data", message);
 
@@ -124,7 +124,7 @@ void send_StartGame(int rounds, Player **players, Player *p){
     cJSON_Delete(package);
 }
 
-void send_StartRound(int wordlen, int Round, int remain, Player **players, Player *p){
+void send_StartRound(int wordlen, int Round, int remain, Player **players, Player *p, int num_players){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "StartRound");
 
@@ -132,7 +132,7 @@ void send_StartRound(int wordlen, int Round, int remain, Player **players, Playe
     cJSON_AddNumberToObject(message, "WordLength", wordlen);
     cJSON_AddNumberToObject(message, "Round", Round);
     cJSON_AddNumberToObject(message, "RountsRemaining", remain);
-    add_player_array(message, players);
+    add_player_array(message, players, num_players);
 
     cJSON_AddItemToObject(package, "Data", message);
 
@@ -170,13 +170,13 @@ void send_GuessResponse(Player *p, char *guess, char *ac){
     cJSON_Delete(package);
 }
 
-void send_GuessResult(Player *p, Player **ps, char *win){
+void send_GuessResult(Player *p, Player **ps, char *win, int num_players){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "GuessResult");
 
     cJSON *message = cJSON_CreateObject();
     cJSON_AddStringToObject(message, "Winner", win);
-    add_player_array_gr(message, ps);
+    add_player_array_gr(message, ps, num_players);
 
     cJSON_AddItemToObject(package, "Data", message);
 
@@ -184,28 +184,28 @@ void send_GuessResult(Player *p, Player **ps, char *win){
     cJSON_Delete(package);
 }
 
-void send_EndRound(Player *p, Player **ps, int rem){
+void send_EndRound(Player *p, Player **ps, int rem, int num_players){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "EndRound");
 
     cJSON *message = cJSON_CreateObject();
     cJSON_AddNumberToObject(message, "RoundsRemaining", rem);
 
-    add_player_array_er(message, ps);
+    add_player_array_er(message, ps, num_players);
     cJSON_AddItemToObject(package, "Data", message);
 
     message_player(cJSON_Print(package), p);
     cJSON_Delete(package);
 }
 
-void send_EndGame(Player *p, char *winner, Player **players){
+void send_EndGame(Player *p, char *winner, Player **players, int num_players){
     cJSON *package = cJSON_CreateObject();
     cJSON_AddStringToObject(package, "MessageType", "EndGame");
 
     cJSON *message = cJSON_CreateObject();
     cJSON_AddStringToObject(message, "WinnerName", winner);
 
-    add_player_array(message, players);
+    add_player_array(message, players, num_players);
 
     cJSON_AddItemToObject(package, "Data", message);
 
@@ -214,10 +214,10 @@ void send_EndGame(Player *p, char *winner, Player **players){
 }
 
 
-cJSON *add_player_array(cJSON *json, Player **ps){
+cJSON *add_player_array(cJSON *json, Player **ps, int num_players){
     cJSON *players = cJSON_AddArrayToObject(json, "PlayerInfo");
 
-    for (int i = 0; i < PLAYERS; i++){
+    for (int i = 0; i < num_players; i++){
         cJSON *playerInfo = cJSON_CreateObject();
         cJSON_AddStringToObject(playerInfo, "Name", ps[i]->name);
         cJSON_AddNumberToObject(playerInfo, "Number", ps[i]->num);
@@ -229,10 +229,10 @@ cJSON *add_player_array(cJSON *json, Player **ps){
     return json;
 }
 
-cJSON *add_player_array_er(cJSON *json, Player **ps){
+cJSON *add_player_array_er(cJSON *json, Player **ps, int num_players){
     cJSON *players = cJSON_AddArrayToObject(json, "PlayerInfo");
 
-    for (int i = 0; i < PLAYERS; i++){
+    for (int i = 0; i < num_players; i++){
         cJSON *playerInfo = cJSON_CreateObject();
         cJSON_AddStringToObject(playerInfo, "Name", ps[i]->name);
         cJSON_AddNumberToObject(playerInfo, "Number", ps[i]->num);
@@ -245,10 +245,10 @@ cJSON *add_player_array_er(cJSON *json, Player **ps){
     return json;
 }
 
-cJSON *add_player_array_gr(cJSON *json, Player **ps){
+cJSON *add_player_array_gr(cJSON *json, Player **ps, int num_players){
     cJSON *players = cJSON_AddArrayToObject(json, "PlayerInfo");
 
-    for (int i = 0; i < PLAYERS; i++){
+    for (int i = 0; i < num_players; i++){
         cJSON *playerInfo = cJSON_CreateObject();
         cJSON_AddStringToObject(playerInfo, "Name", ps[i]->name);
         cJSON_AddNumberToObject(playerInfo, "Number", ps[i]->num);
@@ -293,9 +293,9 @@ char *recv_Guess(cJSON *message, Player *p){
     return guess->valuestring;
 }
 
-Player *find_player(Player **ps, char *name){
+Player *find_player(Player **ps, char *name, int players){
     int i = 0;
-    while (i < PLAYERS){
+    while (i < players){
         if (strcmp(ps[i]->name, name) == 0){
             return ps[i];
         }

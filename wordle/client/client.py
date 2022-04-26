@@ -8,7 +8,6 @@ import socket, sys
 import json
 import threading
 
-ADDR = ("localhost", 41069)
 NAME = "Not Set"
 
 def main():
