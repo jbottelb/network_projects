@@ -48,7 +48,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
     int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
-    char *port = (char *)calloc(BUFSIZ, 1);
+    char *port = (char *)calloc(BUFSIZ, sizeof(char));
     port = new_port;
 
     memset(&hints, 0, sizeof hints);
