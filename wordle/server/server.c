@@ -25,6 +25,7 @@
 #define BACKLOG 10
 #define MAXPLAYERS 100
 #define ROUNDS 6
+#define SLEEPTIME 2
 
 void start_game(char *new_port, Player **players, int nonce){
     printf("GAME LAUNCHED\n");
@@ -114,7 +115,7 @@ void start_game(char *new_port, Player **players, int nonce){
         read_fds = master;
         if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
             printf("Failed to select\n");
-            exit(4);
+            exit(SLEEPTIME);
         }
         for(int i = 0; i <= fdmax; i++) {
             printf("Reading sockets\n");
@@ -148,7 +149,7 @@ void start_game(char *new_port, Player **players, int nonce){
 
                     char* response = "yes";
                     send_JoinInstanceResult(response, p); // check rejection
-                    sleep(1);
+                    sleep(SLEEPTIME);
                     player_count++;
                 }
             }
@@ -158,7 +159,7 @@ void start_game(char *new_port, Player **players, int nonce){
             for (int i = 0; i < player_count; i++) {
                 send_StartGame(ROUNDS, players, players[i]);
                 printf("sent start game\n");
-                sleep(1);
+                sleep(SLEEPTIME);
                 start_game = 0;
             }
         }
@@ -180,7 +181,7 @@ void start_game(char *new_port, Player **players, int nonce){
         for (int i = 0; i < player_count; i++) {
             send_StartRound(w->wordlen, round, ROUNDS - round, players, players[i]);
             printf("sent start round\n");
-            sleep(1);
+            sleep(SLEEPTIME);
             send_PromptForGuess(w->wordlen, players[i], round);
             printf("sent prompt for guess\n");
         }
@@ -189,7 +190,6 @@ void start_game(char *new_port, Player **players, int nonce){
         int num_guesses = 0;
         // Select implementation... now
         while(num_guesses < PLAYERS) {
-            printf("FDMAX %d\n", fdmax);
             read_fds = master;
             if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
                 printf("Failed to select\n");
@@ -198,11 +198,10 @@ void start_game(char *new_port, Player **players, int nonce){
             for(int i = 0; i <= fdmax; i++) {
                 if (FD_ISSET(i, &read_fds)) {
                     if (1 == 1) {
-                        sleep(2);
+                        sleep(SLEEPTIME);
                         char* guess_json = (char *)calloc(SIZE, sizeof(char));
                         guess_json = accept_request(i);
                         printf("%s\n", guess_json);
-
 
                         cJSON *guess_result = cJSON_Parse(guess_json);
                         cJSON *data = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
@@ -223,7 +222,7 @@ void start_game(char *new_port, Player **players, int nonce){
                         }
                         printf("sent guess response\n");
 
-                        sleep(3);
+                        sleep(SLEEPTIME);
                         char *res = make_guess(guess, w);
                         p->score += score_guess(res, round);
                         p->res = res;
@@ -246,17 +245,17 @@ void start_game(char *new_port, Player **players, int nonce){
             }
         }
         w->count++;
-        sleep(2);
+        sleep(SLEEPTIME);
         for (int i = 0; i < player_count; i++) {
             send_EndRound(players[i], players, ROUNDS - round);
             printf("sent end round\n");
         }
-        sleep(2);
+        sleep(SLEEPTIME);
         round++;
     }
 
     // choose winner by score, pass to endgame
-    
+
     // end
     for (int i = 0; i < player_count; i++) {
         send_EndGame(players[i], players[i]->name, players);
