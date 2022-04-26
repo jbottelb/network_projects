@@ -30,6 +30,12 @@ void start_game(char *new_port, Player **players, int nonce){
     printf("GAME LAUNCHED\n");
     printf("GAME NONCE: %d\n", nonce);
 
+    fd_set master;
+    fd_set read_fds;
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+    int fdmax;
+
     // start up socket
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
@@ -97,61 +103,59 @@ void start_game(char *new_port, Player **players, int nonce){
 
     printf("game: waiting for connections...\n");
 
+    FD_SET(sockfd, &master);
+    fdmax = sockfd;
+
     int player_count = 0;
     int start_game = 1;
 
-    while(start_game == 1) {  // main accept() loop
-        sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
+    while(start_game == 1) {
+        printf("Waiting for a player to connect\n");
+        read_fds = master;
+        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
+            printf("Failed to select\n");
+            exit(4);
         }
+        for(int i = 0; i <= fdmax; i++) {
+            printf("Reading sockets\n");
+            if (FD_ISSET(i, &read_fds)) {
+                if (i == sockfd) {
+                    printf("Listener found connection\n");
+                    sin_size = sizeof their_addr;
+                    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+                    if (new_fd == -1) {
+                        perror("accept");
+                        exit(1);
+                    }
 
-        inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
-            s, sizeof s);
-        printf("game: got connection from %s\n", s);
+                    inet_ntop(their_addr.ss_family,
+                        get_in_addr((struct sockaddr *)&their_addr),
+                        s, sizeof s);
+                    printf("game: got connection from %s\n", s);
 
-        // Receive join or joininstance request
-        char *message = accept_request(new_fd);
-        printf("%s\n", message);
+                    // Receive join or joininstance request
+                    char *message = accept_request(new_fd);
+                    printf("%s\n", message);
 
-        cJSON *join_result = cJSON_Parse(message);
-        Player *p = recv_JoinInstance(join_result, new_fd, 0);
-        players[0] = p;
-        /*
-        cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
-        cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
-        cJSON *p_nonce = cJSON_GetObjectItemCaseSensitive(data, "Nonce");
+                    cJSON *join_result = cJSON_Parse(message);
+                    Player *p = recv_JoinInstance(join_result, new_fd, 0);
+                    players[player_count] = p;
 
-        Player *p = create_player(name->valuestring, new_fd, player_count, p_nonce->valueint);
-        */
-
-        int in_players = 1;
-        for (int i = 0; i < PLAYERS; i++) {
-            if (strcmp(players[i]->name, p->name) == 0 && nonce == p->nonce) {
-                char* response = "yes";
-                send_JoinInstanceResult(response, p);
-                sleep(1);
-                player_count++;
-                in_players = 0;
+                    char* response = "yes";
+                    send_JoinInstanceResult(response, p); // check rejection
+                    sleep(1);
+                    player_count++;
+                }
             }
-        }
-
-        if (in_players == 1) {
-            char* response = "no";
-            send_JoinInstanceResult(response, p);
         }
 
         if (player_count == PLAYERS){
             for (int i = 0; i < player_count; i++) {
-                send_StartGame(ROUNDS, players, p);
+                send_StartGame(ROUNDS, players, players[i]);
                 printf("sent start game\n");
                 sleep(1);
                 start_game = 0;
             }
-
         }
     }
 
@@ -266,6 +270,13 @@ void handle_guess(Player *p, cJSON *data, Wordle *w){
 
 int main(int argc, char *argv[])
 {
+    // socket things
+    fd_set master;
+    fd_set read_fds;
+    FD_ZERO(&master);
+    FD_ZERO(&read_fds);
+    int fdmax;
+
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
     struct addrinfo hints, *servinfo, *p;
     struct sockaddr_storage their_addr; // connector's address information
@@ -335,35 +346,55 @@ int main(int argc, char *argv[])
     int nonce = rand() % BUFSIZ;
     int player_count = 0;
 
+    FD_SET(sockfd, &master);
+    fdmax = sockfd;
+
     while(1) {  // main accept() loop
-        sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
+        read_fds = master;
+        if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
+            exit(4);
         }
 
-        inet_ntop(their_addr.ss_family,
-            get_in_addr((struct sockaddr *)&their_addr),
-            s, sizeof s);
-        printf("server: got connection from %s\n", s);
+        for (int i = 0; i <= fdmax; i++)
+        {
+            if (FD_ISSET(i, &read_fds)){
+                if (i == sockfd){
+                    sin_size = sizeof their_addr;
+                    new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+                    if (new_fd == -1) {
+                        perror("accept");
+                        continue;
+                    }
 
-        // Receive join or joininstance request
-        char *message = accept_request(new_fd);
+                    FD_SET(new_fd, &master);
+                    if (new_fd > fdmax){
+                        fdmax = new_fd;
+                    }
 
-        printf("%s\n", message);
+                    inet_ntop(their_addr.ss_family,
+                        get_in_addr((struct sockaddr *)&their_addr),
+                        s, sizeof s);
+                    printf("server: got connection from %s\n", s);
 
-        cJSON *join_result = cJSON_Parse(message);
+                    // Receive join or joininstance request
+                    char *message = accept_request(new_fd);
 
-        cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
-        cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+                    printf("%s\n", message);
 
-        Player *p = create_player(name->valuestring, new_fd, player_count, nonce);
-        players[player_count] = p;
-        player_count++;
+                    cJSON *join_result = cJSON_Parse(message);
 
-        char* response = "yes";
-        send_JoinResult(response, p);
+                    cJSON *data = cJSON_GetObjectItemCaseSensitive(join_result, "Data");
+                    cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+
+                    Player *p = create_player(name->valuestring, new_fd, player_count, nonce);
+                    players[player_count] = p;
+                    player_count++;
+
+                    char* response = "yes";
+                    send_JoinResult(response, p);
+                }
+            }
+        }
 
         if (player_count == PLAYERS){
             signal(SIGCHLD, SIG_IGN);
@@ -384,6 +415,7 @@ int main(int argc, char *argv[])
 
                 start_game(GAMEPORT, players, nonce);
             }
+            player_count = 0;
         }
     }
 
