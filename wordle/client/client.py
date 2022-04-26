@@ -36,7 +36,8 @@ def hacky_recv(sock):
         except:
             continue
     print(r["Data"]["Name"] + ": " + r["Data"]["Text"])
-    return hacky_recv(sock)
+    hacky_recv(sock)
+    print("Reciver function exiting!")
 
 def chat_handler(sock):
     print("Waiting for server, feel free to chat")
@@ -96,6 +97,8 @@ def send_request(req):
                     while flag == "again":
                         # Build and send Guess
                         guess, args = {}, {}
+                        listener = threading.Thread(target=hacky_recv, args=(sock,))
+                        listener.start()
                         for line in sys.stdin:
                             line = line.split()
                             guess["MessageType"] = line[0]
@@ -119,24 +122,8 @@ def send_request(req):
                                 # Guess Response
                                 result = hacky_recv(sock)
                                 print(result)
+                                break
 
-                                if result["Data"]["Accepted"] == "yes":
-                                    flag = "not again"
-                                    break
-                                else:
-                                    # Prompt for Guess
-                                    result = hacky_recv(sock)
-                                    print(result)
-
-                    print("guess valid")
-
-                    # Guess Result
-                    result = hacky_recv(sock)
-                    print(result)
-
-                    # End Round
-                    result = hacky_recv(sock)
-                    print(result)
 
                     win = False
                     for p in result["Data"]["PlayerInfo"]:

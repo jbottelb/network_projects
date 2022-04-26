@@ -127,7 +127,6 @@ void start_game(char *new_port, Player **players, int nonce){
                         perror("accept");
                         exit(1);
                     }
-                    printf("NEW FD = %d\n", new_fd);
                     FD_SET(new_fd, &master);
                     if (new_fd > fdmax) {
                         fdmax = new_fd;
