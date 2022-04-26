@@ -127,6 +127,11 @@ void start_game(char *new_port, Player **players, int nonce){
                         perror("accept");
                         exit(1);
                     }
+                    printf("NEW FD = %d\n", new_fd);
+                    FD_SET(new_fd, &master);
+                    if (new_fd > fdmax) {
+                        fdmax = new_fd;
+                    }
 
                     inet_ntop(their_addr.ss_family,
                         get_in_addr((struct sockaddr *)&their_addr),
@@ -138,7 +143,7 @@ void start_game(char *new_port, Player **players, int nonce){
                     printf("%s\n", message);
 
                     cJSON *join_result = cJSON_Parse(message);
-                    Player *p = recv_JoinInstance(join_result, new_fd, 0);
+                    Player *p = recv_JoinInstance(join_result, new_fd, player_count);
                     players[player_count] = p;
 
                     char* response = "yes";
@@ -168,80 +173,95 @@ void start_game(char *new_port, Player **players, int nonce){
     printf("Word is %s\n", word);
 
     int round = 1;
+    int game_over = 0;
 
-    while (round <= ROUNDS){
+    while (round <= ROUNDS && game_over == 0){
+        // Start
         for (int i = 0; i < player_count; i++) {
-            send_StartRound(w->wordlen, round, ROUNDS - round, players, players[0]);
+            send_StartRound(w->wordlen, round, ROUNDS - round, players, players[i]);
             printf("sent start round\n");
             sleep(1);
-            send_PromptForGuess(w->wordlen, players[0], round);
+            send_PromptForGuess(w->wordlen, players[i], round);
             printf("sent prompt for guess\n");
         }
 
-        // Select implementation...later
+        // assuming players behave
+        int num_guesses = 0;
+        // Select implementation... now
+        while(num_guesses < PLAYERS) {
+            printf("FDMAX %d\n", fdmax);
+            read_fds = master;
+            if (select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1){
+                printf("Failed to select\n");
+                exit(4);
+            }
+            for(int i = 0; i <= fdmax; i++) {
+                if (FD_ISSET(i, &read_fds)) {
+                    if (1 == 1) {
+                        sleep(2);
+                        char* guess_json = (char *)calloc(SIZE, sizeof(char));
+                        guess_json = accept_request(i);
+                        printf("%s\n", guess_json);
 
-        // Receive Guess and Check It
-        // Receive join or joininstance request
-        sleep(5);
-        char* guess_json = (char *)calloc(SIZE, sizeof(char));
-        guess_json = accept_request(new_fd);
-        printf("%s\n", guess_json);
 
-        cJSON *guess_result = cJSON_Parse(guess_json);
-        char* guess = recv_Guess(guess_result, players[0]);
-        printf("%s\n", guess);
+                        cJSON *guess_result = cJSON_Parse(guess_json);
+                        cJSON *data = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
+                        cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
 
-        if (in_word_list(guess) == 0) {
-            send_GuessResponse(players[0], guess, "yes");
-        }
-        else {
-            send_GuessResponse(players[0], guess, "no");
-        }
-        printf("sent guess response\n");
+                        Player *p = find_player(players, name->valuestring);
+                        printf("Player found: %s\n", p->name);
+                        printf("Expected player: %s\n", name->valuestring);
 
-        sleep(3);
-        char *res = make_guess(guess, w);
-        players[0]->score += score_guess(res, round);
-        players[0]->res = res;
-        int go = 0;
-        if (is_correct(res) == 0){
-            // correct guess
-            char *yes = (char *)calloc(5 /* Just in case */, sizeof(char));
-            players[0]->winner  = "yes";
-            players[0]->correct = "yes";
-            printf("A player has guessed correctly.\n");
-            send_GuessResult(players[0], players, "yes");
-            go = 1;
-        } else {
-            send_GuessResult(players[0], players, "no");
+                        char* guess = recv_Guess(guess_result, p);
+                        printf("%s\n", guess);
+
+                        if (in_word_list(guess) == 0) {
+                            send_GuessResponse(p, guess, "yes");
+                        }
+                        else {
+                            send_GuessResponse(p, guess, "no");
+                        }
+                        printf("sent guess response\n");
+
+                        sleep(3);
+                        char *res = make_guess(guess, w);
+                        p->score += score_guess(res, round);
+                        p->res = res;
+
+                        num_guesses++;
+
+                        if (is_correct(res) == 0){
+                            // correct guess
+                            char *yes = (char *)calloc(5 /* Just in case */, sizeof(char));
+                            p->winner  = "yes";
+                            p->correct = "yes";
+                            printf("A player has guessed correctly.\n");
+                            game_over = 1;
+                            send_GuessResult(p, players, "yes");
+                        } else {
+                            send_GuessResult(p, players, "no");
+                        }
+                    }
+                }
+            }
         }
         w->count++;
-
-        printf("sent guess result\n");
-
-        sleep(4);
-        send_EndRound(players[0], players, ROUNDS - round);
-        printf("sent end round\n");
-        sleep(4);
-        if (go == 1){
-            break;
+        sleep(2);
+        for (int i = 0; i < player_count; i++) {
+            send_EndRound(players[i], players, ROUNDS - round);
+            printf("sent end round\n");
         }
-
+        sleep(2);
         round++;
     }
 
-    send_EndGame(players[0], players[0]->name, players);
-    printf("sent end game\n");
-    /*
-    Game Loop
-    for loop for all guesses,
-        tell everyone we started the round, then another while loop with select
-        on players giving guess, handle that with another function
-        break if someone wins
-    */
-
-    // calculate restuls, report results
-
+    // choose winner by score, pass to endgame
+    
+    // end
+    for (int i = 0; i < player_count; i++) {
+        send_EndGame(players[i], players[i]->name, players);
+        printf("sent end game\n");
+    }
 }
 
 // deals with a player sending a guess
@@ -429,7 +449,7 @@ char *accept_request(int sock)
 
     // Receives request from client
     if ((numbytes = recv(sock, buf, SIZE-1, 0)) == -1){
-        printf("server: request was not received. \n");
+        printf("accept request: request was not received. \n");
         exit(1);
     }
 
