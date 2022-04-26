@@ -65,7 +65,7 @@ int main() {
 
 
     char *word = (char *)calloc(128, sizeof(char));
-    word = "bxard";
+    word = "board";
     if (in_word_list(word) == 0){
         printf("Word in list\n");
     } else {

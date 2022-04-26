@@ -92,7 +92,7 @@ char *select_word(Wordle *w){
 int in_word_list(char *word){
     char string[50];
     FILE *in_file = fopen("server/word_list.txt", "r");
-    while ( fscanf(in_file,"%s", string) == 1){
+    while ( fscanf(in_file, "%s", string) == 1){
         if(strstr(string, word) != 0) {
             fclose(in_file);
             return 0;

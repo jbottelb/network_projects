@@ -151,22 +151,17 @@ void start_game(char *new_port, Player **players, int nonce){
                 sleep(1);
                 start_game = 0;
             }
-            
+
         }
     }
 
 
     // create game instance select word, create "Board"
     Wordle *w = create_board("Fucknuts", ROUNDS);
+    char *word = (char *) calloc(BUFSIZ, sizeof(char));
+    word = select_word(w);
 
-    //char *word = select_word(w);
-    //fix this later
-
-    char *word = (char *) calloc(5, sizeof(char));
-    word = "death";
     printf("Word is %s\n", word);
-    w->word = word;
-    w->wordlen = 5;
 
     int round = 1;
     while (round <= ROUNDS){
@@ -179,7 +174,7 @@ void start_game(char *new_port, Player **players, int nonce){
         }
 
         // Select implementation...later
-        
+
         // Receive Guess and Check It
         // Receive join or joininstance request
         sleep(5);
@@ -191,30 +186,30 @@ void start_game(char *new_port, Player **players, int nonce){
         char* guess = recv_Guess(guess_result, players[0]);
         printf("%s\n", guess);
 
-        /*if (in_word_list(guess) == 0) {
-            printf("here 1\n");
+        if (in_word_list(guess) == 0) {
             send_GuessResponse(players[0], guess, "yes");
-            printf("here 3\n");
         }
         else {
-            printf("here 2\n");
             send_GuessResponse(players[0], guess, "no");
-            printf("here 4\n");
         }
         printf("sent guess response\n");
-        */
 
-        send_GuessResponse(players[0], guess, "yes");
-        printf("sent guess response\n");
-        sleep(2);
+        sleep(3);
         char *res = make_guess(guess, w);
+        players[0]->score += score_guess(res, round);
+        players[0]->res = res;
+        if (is_correct(res) == 0){
+            // correct guess
+            send_GuessResult(players[0], players, "yes");
+        } else {
+            send_GuessResult(players[0], players, "no");
+        }
         w->count++;
 
-        
         send_GuessResult(players[0], players, res);
         printf("sent guess result\n");
 
-        sleep(2);
+        sleep(3);
         send_EndRound(players[0], players, ROUNDS - round);
         printf("sent end round\n");
 

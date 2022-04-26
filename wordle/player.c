@@ -28,6 +28,7 @@ Player *create_player(char *name, int socket, int num, int nonce){
     new->winner = "no";
     new->state = WAITING;
     new->correct = "no";
+    new->score = 0;
 
     return new;
 }

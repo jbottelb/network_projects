@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+def hacky_recv(sock):
+    rec = b''
+    while True:
+        rec += sock.recv(16)
+        try:
+            return json.loads(rec.decode())
+        except:
+            continue
+
 '''
 Client for Calendar
 Python 3, Joe and Josh
@@ -26,41 +35,35 @@ def send_request(req):
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            rec = sock.recv(1024)
-            join = json.loads(rec.decode())
+            join = hacky_recv(sock)
             print(join)
 
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
-                rec = sock.recv(1024)
-                join = json.loads(rec.decode())
+                join = hacky_recv(sock)
                 print(join)
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
 
-            rec = sock.recv(1024)
-            join = json.loads(rec.decode())
+            join = hacky_recv(sock)
             print(join)
 
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
                 # Start Game message
-                rec = sock.recv(1024)
-                result = json.loads(rec.decode())
+                result = hacky_recv(sock)
                 print(result)
 
                 for _ in range(int(result["Data"]["Rounds"])):
                     # Start Round
-                    rec = sock.recv(1024)
-                    result = json.loads(rec.decode())
+                    result = hacky_recv(sock)
                     print(result)
 
                     # Prompt for Guess
-                    rec = sock.recv(1024)
-                    result = json.loads(rec.decode())
+                    result = hacky_recv(sock)
                     print(result)
 
                     # Guess logic
@@ -75,7 +78,7 @@ def send_request(req):
                             guess["Data"] = args
                             print(guess)
                             sock.sendall(json.dumps(guess).encode())
-                        
+
                             # Guess Response
                             rec = sock.recv(1024)
                             result = json.loads(rec.decode())
@@ -85,31 +88,25 @@ def send_request(req):
                                 break
                             else:
                                 # Prompt for Guess
-                                rec = sock.recv(1024)
-                                result = json.loads(rec.decode())
+                                result = hacky_recv(sock)
                                 print(result)
                         break
                     print("guess valid")
 
                     # Guess Result
-                    rec = sock.recv(1024)
-                    result = json.loads(rec.decode())
+                    result = hacky_recv(sock)
                     print(result)
 
                     # End Round
-                    rec = sock.recv(1024)
-                    result = json.loads(rec.decode())
+                    result = hacky_recv(sock)
                     print(result)
-                
+
                 # End Game
-                rec = sock.recv(1024)
-                result = json.loads(rec.decode())
-                print(result)                        
+                result = hacky_recv(sock)
+                print(result)
         else:
             print("Something went wrong if we got here")
             exit(1)
-
-
 
 
 def build_data_join():
