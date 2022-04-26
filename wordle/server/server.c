@@ -25,7 +25,7 @@
 #define BACKLOG 10
 #define MAXPLAYERS 100
 #define ROUNDS 6
-#define SLEEPTIME 2
+#define SLEEPTIME 1
 #define PLAYERS 2
 #define DICT "server/word_list.txt"
 
@@ -175,6 +175,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
 
     int round = 1;
     int game_over = 0;
+    int set_game_over = 0;
 
     while (round <= set_rounds && game_over == 0){
         // Start
@@ -237,7 +238,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
                             p->winner  = "yes";
                             p->correct = "yes";
                             printf("A player has guessed correctly.\n");
-                            game_over = 1;
+                            set_game_over = 1;
                             send_GuessResult(p, players, "yes", set_players);
                         } else {
                             send_GuessResult(p, players, "no", set_players);
@@ -265,6 +266,9 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
         for (int i = 0; i < player_count; i++) {
             send_EndRound(players[i], players, set_rounds - round, set_players);
             printf("sent end round\n");
+            if (set_game_over == 1){
+                game_over = 1;
+            }
         }
         sleep(SLEEPTIME);
         round++;
@@ -333,7 +337,7 @@ int main(int argc, char *argv[])
             }
             else if(argv[i][1] == 'd') {
                 dict_file = argv[i + 1];
-            } 
+            }
             else {
                 printf("Invalid command line argument: %s\n", argv[i]);
                 exit(1);

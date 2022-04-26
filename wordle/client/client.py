@@ -72,7 +72,7 @@ def hacky_recv(sock):
 
 def chat_handler(sock):
     print("Waiting for server, feel free to chat")
-    print("After server response, type exit")
+    print("After server response, Ctrl-D to exit")
     m = {}
     args = {}
     for line in sys.stdin:
