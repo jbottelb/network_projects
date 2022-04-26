@@ -9,6 +9,7 @@ import json
 
 ADDR = ("localhost", 41069)
 
+
 def main():
     # TODO: validate length
     l = len(sys.argv)

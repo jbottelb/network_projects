@@ -164,6 +164,7 @@ void start_game(char *new_port, Player **players, int nonce){
     printf("Word is %s\n", word);
 
     int round = 1;
+
     while (round <= ROUNDS){
         for (int i = 0; i < player_count; i++) {
             send_StartRound(w->wordlen, round, ROUNDS - round, players, players[0]);
@@ -202,7 +203,8 @@ void start_game(char *new_port, Player **players, int nonce){
         if (is_correct(res) == 0){
             // correct guess
             char *yes = (char *)calloc(5 /* Just in case */, sizeof(char));
-            players[0]->winner = "yes";
+            players[0]->winner  = "yes";
+            players[0]->correct = "yes";
             printf("A player has guessed correctly.\n");
             send_GuessResult(players[0], players, "yes");
             go = 1;

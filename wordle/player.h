@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/time.h>
 #include "cJSON.h"
 
 #define PLAYERS 1
