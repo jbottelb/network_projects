@@ -19,7 +19,7 @@
 #include <sys/time.h>
 #include "cJSON.h"
 
-#define PLAYERS 2
+#define PLAYERS 3
 
 typedef enum {
     GUESSED, GUESSING, WAITING

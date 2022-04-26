@@ -6,9 +6,10 @@ Python 3, Joe and Josh
 '''
 import socket, sys
 import json
+import threading
 
 ADDR = ("localhost", 41069)
-
+NAME = "Not Set"
 
 def main():
     # TODO: validate length
@@ -22,13 +23,32 @@ def main():
         exit(1)
 
 def hacky_recv(sock):
+    r = {}
     rec = b''
     while True:
         rec += sock.recv(128)
         try:
-            return json.loads(rec.decode())
+            r = json.loads(rec.decode())
+            print(r)
+            if (r["MessageType"] == "Chat"):
+                break
+            return r
         except:
             continue
+    print(r["Data"]["Name"] + ": " + r["Data"]["Text"])
+    return hacky_recv(sock)
+
+def chat_handler(sock):
+    print("Waiting for server, feel free to chat")
+    m = {}
+    args = {}
+    for line in sys.stdin:
+        m["MessageType"] = "Chat"
+        args["Name"] = NAME
+        args["Text"] = line.strip()
+        m["Data"] = args
+        print(m)
+        sock.sendall(json.dumps(m).encode())
 
 def send_request(req):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -42,8 +62,11 @@ def send_request(req):
             if join["Data"]["Result"] == "no":
                 exit(0)
             else:
+                x = threading.Thread(target=chat_handler, args=(sock,))
+                x.start()
                 join = hacky_recv(sock)
                 print(join)
+                x.join()
         elif req["MessageType"] == "JoinInstance":
             sock.connect((req["Data"]["Server"], int(req["Data"]["Port"])))
             sock.sendall(json.dumps(req).encode())
@@ -140,4 +163,5 @@ def build_data_join():
     return request
 
 if __name__ == "__main__":
+    NAME = sys.argv[3]
     main()

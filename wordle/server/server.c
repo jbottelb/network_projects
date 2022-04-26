@@ -411,6 +411,21 @@ int main(int argc, char *argv[])
 
                     char* response = "yes";
                     send_JoinResult(response, p);
+                } else {
+                    sleep(SLEEPTIME);
+                    char* guess_json = (char *)calloc(SIZE, sizeof(char));
+                    guess_json = accept_request(i);
+                    cJSON *chat_result = cJSON_Parse(guess_json);
+                    cJSON *data   = cJSON_GetObjectItemCaseSensitive(chat_result, "Data");
+                    cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
+                    cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
+                    for (int k = 0; k < player_count; k++){
+                        if (players[k]->socket == i){
+                            continue;
+                        }
+                        printf("Relaying chat %s: %s\n", j_name->valuestring, censor(j_text->valuestring));
+                        send_Chat(censor(j_text->valuestring), j_name->valuestring, players[k]);
+                    }
                 }
             }
         }
