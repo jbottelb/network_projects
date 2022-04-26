@@ -277,6 +277,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
     // choose winner by score, pass to endgame
 
     // end
+    // this tells everyone that they are the winner LMAO
     for (int i = 0; i < player_count; i++) {
         send_EndGame(players[i], players[i]->name, players, set_players);
         printf("sent end game\n");
