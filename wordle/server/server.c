@@ -218,6 +218,7 @@ void start_game(char *new_port, Player **players, int nonce){
                         }
                         else {
                             send_GuessResponse(p, guess, "no");
+                            //continue;
                         }
                         printf("sent guess response\n");
 
