@@ -275,11 +275,13 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
     }
 
     // choose winner by score, pass to endgame
+    char *winner_name = (char *)calloc(BUFSIZ, 1);
+    winner_name = find_winner(players, set_players);
 
     // end
     // this tells everyone that they are the winner LMAO
     for (int i = 0; i < player_count; i++) {
-        send_EndGame(players[i], players[i]->name, players, set_players);
+        send_EndGame(players[i], winner_name, players, set_players);
         printf("sent end game\n");
     }
 }

@@ -303,3 +303,22 @@ Player *find_player(Player **ps, char *name, int players){
     }
     return NULL;
 }
+
+char *find_winner(Player **ps, int players){
+    char *winner_name; 
+    int i = 0;
+    int top_score = -1;
+
+    while (i < players){
+        if (ps[i]->score > top_score){
+            winner_name = ps[i]->name;
+            top_score = ps[i]->score;
+        }
+        else if (ps[i]->score == top_score) {
+            strcat(winner_name, ", ");
+            strcat(winner_name, ps[i]->name);
+        }
+        i++;
+    }
+    return winner_name;
+}

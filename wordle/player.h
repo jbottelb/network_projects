@@ -65,4 +65,5 @@ cJSON *add_player_array_er(cJSON *json, Player **ps, int num_players);
 
 
 Player *find_player(Player **ps, char *name, int players);
+char *find_winner(Player **ps, int players);
 #endif
