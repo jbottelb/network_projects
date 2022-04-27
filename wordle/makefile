@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS=-I. -lm
+CC=gcc -std=c99
+CFLAGS=-I. -lm 
 DEPS = wordle.h cJSON.h player.h
 
 %.o: %.c $(DEPS)
