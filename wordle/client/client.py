@@ -42,7 +42,7 @@ def hacky_recv(sock):
             print("The Game has started")
         elif r["MessageType"] == "JoinInstanceResult":
             if r["Data"]["Result"] == "yes":
-                print("Nonce: " + r["Data"]["Nonce"], "Port:", r["Data"]["Port"])
+                #print("Nonce: " + r["Data"]["Nonce"], "Port:", r["Data"]["Port"])
                 print("Entered Lobby")
             else:
                 print("Failed to enter Lobby")
