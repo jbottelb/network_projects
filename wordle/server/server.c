@@ -19,8 +19,6 @@
 #include "wordle.h"
 #include "cJSON.h"
 
-#define _POSIX_C_SOURCE 200112L
-
 #define PORT "41069"
 #define GAMEPORT "41420"
 #define SIZE 1000
