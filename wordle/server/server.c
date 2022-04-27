@@ -169,8 +169,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
     // create game instance select word, create "Board"
     Wordle *w = create_board("Fucknuts", set_rounds);
     char *word = (char *) calloc(BUFSIZ, sizeof(char));
-    //word = select_word(w, dict_file);
-    word = "bumps";
+    word = select_word(w, dict_file);
 
     printf("Word is %s\n", word);
 

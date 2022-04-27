@@ -60,7 +60,13 @@ char *make_guess (char *guess, Wordle *board){
 }
 
 char *select_word(Wordle *w, char *dict_file){
-    int num = 2314; // number of words in file
+    FILE *file = fopen(dict_file, "r");
+    char yert[5];
+    int num = 0; // number of words in the file
+    while (fgets(yert, sizeof(yert), file) != NULL) {
+        ++num;
+    }
+    
     char *word = (char *) calloc(128, sizeof(char));
     time_t t;
     int index;
@@ -68,7 +74,6 @@ char *select_word(Wordle *w, char *dict_file){
     index = rand() % num;
     // now we move forward that many spaces, then select that word
     char string[5];
-    FILE *file = fopen(dict_file, "r");
     while ( fscanf(file, "%s", string) ){
         int i = 0;
         if (index == 0){
