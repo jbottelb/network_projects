@@ -48,8 +48,8 @@ Wordle *create_board (char *name, int guesses);
 */
 char *make_guess (char *guess, Wordle *board);
 int is_correct (char *res);
-int in_word_list(char *word, char*dict_file);
-char *select_word(Wordle *w);
+int in_word_list(char *word, char *dict_file);
+char *select_word(Wordle *w, char *dict_file);
 int score_guess(char *res, int round);
 
 
