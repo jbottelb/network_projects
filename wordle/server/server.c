@@ -19,6 +19,8 @@
 #include "wordle.h"
 #include "cJSON.h"
 
+#define _POSIX_C_SOURCE 200112L
+
 #define PORT "41069"
 #define GAMEPORT "41420"
 #define SIZE 1000
@@ -119,9 +121,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
             printf("Failed to select\n");
             exit(SLEEPTIME);
         }
-
-        int i;
-        for(i = 0; i <= fdmax; i++) {
+        for(int i = 0; i <= fdmax; i++) {
             if (FD_ISSET(i, &read_fds)) {
                 if (i == sockfd) {
                     printf("Listener found connection\n");
@@ -158,8 +158,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
         }
 
         if (player_count == set_players){
-            int i;
-            for (i = 0; i < player_count; i++) {
+            for (int i = 0; i < player_count; i++) {
                 send_StartGame(set_rounds, players, players[i], set_players);
                 printf("sent start game\n");
                 sleep(SLEEPTIME);
@@ -182,8 +181,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
 
     while (round <= set_rounds && game_over == 0){
         // Start
-        int i;
-        for (i = 0; i < player_count; i++) {
+        for (int i = 0; i < player_count; i++) {
             send_StartRound(w->wordlen, round, set_rounds - round, players, players[i], set_players);
             printf("sent start round\n");
             sleep(SLEEPTIME);
@@ -200,8 +198,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
                 printf("Failed to select\n");
                 exit(4);
             }
-            int i;
-            for(i = 0; i <= fdmax; i++) {
+            for(int i = 0; i <= fdmax; i++) {
                 if (FD_ISSET(i, &read_fds)) {
                     sleep(SLEEPTIME);
                     char* guess_json = (char *)calloc(SIZE, sizeof(char));
@@ -255,8 +252,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
                         cJSON *data   = cJSON_GetObjectItemCaseSensitive(guess_result, "Data");
                         cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
                         cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
-                        int k;
-                        for (k = 0; k < set_players; k++){
+                        for (int k = 0; k < set_players; k++){
                             if (players[k]->socket == i){
                                 continue;
                             }
@@ -269,9 +265,8 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
         }
         w->count++;
         sleep(SLEEPTIME);
-        int l;
-        for (l = 0; l < player_count; l++) {
-            send_EndRound(players[l], players, set_rounds - round, set_players);
+        for (int i = 0; i < player_count; i++) {
+            send_EndRound(players[i], players, set_rounds - round, set_players);
             printf("sent end round\n");
             if (set_game_over == 1){
                 game_over = 1;
@@ -287,8 +282,7 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
 
     // end
     // this tells everyone that they are the winner LMAO
-    int i;
-    for (i = 0; i < player_count; i++) {
+    for (int i = 0; i < player_count; i++) {
         send_EndGame(players[i], winner_name, players, set_players);
         printf("sent end game\n");
     }
@@ -332,8 +326,7 @@ int main(int argc, char *argv[])
     char *game_port = (char *)calloc(BUFSIZ, 1);
     game_port = GAMEPORT;
 
-    int i;
-    for(i = 1; i < argc; i++) {
+    for(int i = 1; i < argc; i++) {
         if(argv[i][0] == '-') {
             if(argv[i][1] == 'n' && argv[i][2] == 'p') {
                 set_players = atoi(argv[i + 1]);
@@ -443,8 +436,7 @@ int main(int argc, char *argv[])
             exit(4);
         }
 
-        int i;
-        for (i = 0; i <= fdmax; i++)
+        for (int i = 0; i <= fdmax; i++)
         {
             if (FD_ISSET(i, &read_fds)){
                 if (i == sockfd){
@@ -489,8 +481,7 @@ int main(int argc, char *argv[])
                     cJSON *data   = cJSON_GetObjectItemCaseSensitive(chat_result, "Data");
                     cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
                     cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
-                    int k;
-                    for (k = 0; k < player_count; k++){
+                    for (int k = 0; k < player_count; k++){
                         if (players[k]->socket == i){
                             continue;
                         }
@@ -511,8 +502,7 @@ int main(int argc, char *argv[])
             }
             else if(pid == 0) {
                 //Message all players to join game lobby, then drop them
-                int i;
-                for (i = 0; i < player_count; i++) {
+                for (int i = 0; i < player_count; i++) {
                     send_StartInstance(players[i], "localhost", game_port);
 
                     // Closes socket and returns to listening for new connections

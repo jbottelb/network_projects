@@ -1,4 +1,4 @@
-CC=gcc 
+CC=gcc -std=c99
 CFLAGS=-I. -lm 
 DEPS = wordle.h cJSON.h player.h
 
