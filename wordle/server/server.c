@@ -269,9 +269,9 @@ void start_game(char *new_port, Player **players, int nonce, int set_players, in
         }
         w->count++;
         sleep(SLEEPTIME);
-        int i;
-        for (i = 0; i < player_count; i++) {
-            send_EndRound(players[i], players, set_rounds - round, set_players);
+        int l;
+        for (l = 0; l < player_count; l++) {
+            send_EndRound(players[l], players, set_rounds - round, set_players);
             printf("sent end round\n");
             if (set_game_over == 1){
                 game_over = 1;
