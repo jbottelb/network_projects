@@ -24,7 +24,7 @@
 #define SIZE 1000
 #define BACKLOG 10
 #define MAXPLAYERS 100
-#define ROUNDS 6
+#define ROUNDS 3
 #define SLEEPTIME 1
 #define PLAYERS 2
 #define DICT "server/word_list.txt"
