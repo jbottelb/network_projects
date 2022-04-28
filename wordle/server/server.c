@@ -19,8 +19,8 @@
 #include "wordle.h"
 #include "cJSON.h"
 
-#define PORT "41069"
-#define GAMEPORT "41420"
+#define PORT "42000"
+#define GAMEPORT "43000"
 #define SIZE 1000
 #define BACKLOG 10
 #define MAXPLAYERS 100
@@ -423,8 +423,10 @@ int main(int argc, char *argv[])
 
     printf("server: waiting for connections...\n");
     Player **players = (Player **)calloc(MAXPLAYERS, sizeof(Player *));
+    Player **players_2 = (Player **)calloc(MAXPLAYERS, sizeof(Player *));
     int nonce = rand() % BUFSIZ;
     int player_count = 0;
+    int new_instance = 1;
 
     FD_SET(sockfd, &master);
     fdmax = sockfd;
@@ -467,7 +469,12 @@ int main(int argc, char *argv[])
                     cJSON *name = cJSON_GetObjectItemCaseSensitive(data, "Name");
 
                     Player *p = create_player(name->valuestring, new_fd, player_count, nonce);
-                    players[player_count] = p;
+                    if (new_instance == 1) {
+                        players[player_count] = p;
+                    }
+                    else {
+                        players_2[player_count] = p;
+                    }
                     player_count++;
 
                     char* response = "yes";
@@ -481,11 +488,24 @@ int main(int argc, char *argv[])
                     cJSON *j_name = cJSON_GetObjectItemCaseSensitive(data, "Name");
                     cJSON *j_text = cJSON_GetObjectItemCaseSensitive(data, "Text");
                     for (int k = 0; k < player_count; k++){
-                        if (players[k]->socket == i){
-                            continue;
+                        if (new_instance == 1) {
+                            if (players[k]->socket == i){
+                                continue;
+                            }
+                        }
+                        else {
+                            if (players_2[k]->socket == i){
+                                continue;
+                            }
                         }
                         printf("Relaying chat %s: %s\n", j_name->valuestring, censor(j_text->valuestring));
-                        send_Chat(censor(j_text->valuestring), j_name->valuestring, players[k]);
+                        
+                        if (new_instance == 1) {
+                            send_Chat(censor(j_text->valuestring), j_name->valuestring, players[k]);
+                        }
+                        else {
+                            send_Chat(censor(j_text->valuestring), j_name->valuestring, players_2[k]);
+                        }
                     }
                 }
             }
@@ -502,15 +522,29 @@ int main(int argc, char *argv[])
             else if(pid == 0) {
                 //Message all players to join game lobby, then drop them
                 for (int i = 0; i < player_count; i++) {
-                    send_StartInstance(players[i], "localhost", game_port);
+                    if (new_instance == 1) {
+                        send_StartInstance(players[i], "localhost", game_port);
+                        close(players[i]->socket);
+                    }
+                    else {
+                        send_StartInstance(players_2[i], "localhost", game_port);
+                        close(players_2[i]->socket);
+                    }
 
                     // Closes socket and returns to listening for new connections
-                    close(players[i]->socket);
                 }
 
-                start_game(game_port, players, nonce, set_players, set_rounds, dict_file);
+                if (new_instance == 1) {
+                    start_game(game_port, players, nonce, set_players, set_rounds, dict_file);
+                }
+                else {
+                    start_game(game_port, players_2, nonce, set_players, set_rounds, dict_file);
+                }
             }
+
             player_count = 0;
+            game_port = "44000";
+            new_instance = 0;
         }
     }
 
