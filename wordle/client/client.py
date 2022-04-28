@@ -35,7 +35,7 @@ def hacky_recv(sock):
         if r["MessageType"] == "Chat":
             print(r["Data"]["Name"] + ": " + r["Data"]["Text"])
         elif r["MessageType"] == "PromptForGuess":
-            print("mpwordle: The server prompts for a guess")
+            print("mpwordle: Enter your guess")
         elif r["MessageType"] == "StartRound":
             print("mpwordle: The Round has started")
         elif r["MessageType"] == "StartGame":
@@ -105,14 +105,14 @@ def send_request(req):
             sys.exit(0)
         elif req["MessageType"] == "JoinInstance":
             while True:
-                print("mpwordle: Enter Chat or Guess <guess string>")
+                print("Enter Chat or Guess <guess string>")
                 for line in sys.stdin:
                     try:
                         guess, args = {}, {}
                         line = line.split()
                         guess["MessageType"] = line[0]
                         if (guess["MessageType"] == "Chat"):
-                            print("mpwordle: Type your message")
+                            print("Type your message")
                             m = {}
                             message = input()
                             m["MessageType"] = "Chat"
