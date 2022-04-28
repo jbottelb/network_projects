@@ -40,17 +40,25 @@ def hacky_recv(sock):
             print("mpwordle: The Round has started")
         elif r["MessageType"] == "StartGame":
             print("mpwordle: The Game has started")
-        elif r["MessageType"] == "JoinInstanceResult":
+        elif r["MessageType"] == "JoinResult":
             if r["Data"]["Result"] == "yes":
-                print("mpwordle: Player Entered Lobby")
+                print("mpwordle: Player Entered Waiting Lobby")
+                print("mpwordle: Waiting for server, feel free to chat")
             else:
                 print("Failed to enter Lobby")
+        elif r["MessageType"] == "JoinInstanceResult":
+            if r["Data"]["Result"] == "yes":
+                print("mpwordle: Player Entered Game Lobby")
+            else:
+                print("Failed to enter Game Lobby")
         elif r["MessageType"] == "GuessResponse":
             if r["Data"]["Accepted"] == "yes":
                 print("mpwordle: Guess accepted")
             else:
                 print("mpwordle: Word not in list. Guess again")
         elif r["MessageType"] == "StartInstance":
+            print("Nonce: " + str(r["Data"]["Nonce"]), "Port:", r["Data"]["Port"])
+            print("mpwordle: Type exit or hit enter/return to quit the waiting lobby and join the game!")
             exit(0)
         elif r["MessageType"] == "EndRound":
             print("mpwordle: Round recap")
@@ -67,12 +75,10 @@ def hacky_recv(sock):
                     print("mpwordle: Reponse: " + e["Result"])
         else:
             # anything we havent coded
-            print(r)
+            pass
 
 
 def chat_handler(sock):
-    print("mpwordle: Waiting for server, feel free to chat")
-    print("After server response, Ctrl-D to exit")
     m = {}
     args = {}
     for line in sys.stdin:
